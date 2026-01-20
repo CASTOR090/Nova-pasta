@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roleta</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #8B0000 0%, #DC143C 50%, #B22222 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            max-width: 900px;
+            width: 100%;
+            border: 3px solid #ffd700;
+        }
+        h1 {
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .nav-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .roulette-area {
+            position: relative;
+            margin: 40px 0;
+        }
+        .wheel {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            margin: 0 auto;
+            position: relative;
+            background: conic-gradient(
+                #ff0000 0deg 9.73deg,
+                #000000 9.73deg 19.46deg,
+                #ff0000 19.46deg 29.19deg,
+                #000000 29.19deg 38.92deg,
+                #ff0000 38.92deg 48.65deg,
+                #000000 48.65deg 58.38deg,
+                #ff0000 58.38deg 68.11deg,
+                #000000 68.11deg 77.84deg,
+                #ff0000 77.84deg 87.57deg,
+                #000000 87.57deg 97.3deg,
+                #ff0000 97.3deg 107.03deg,
+                #000000 107.03deg 116.76deg,
+                #ff0000 116.76deg 126.49deg,
+                #000000 126.49deg 136.22deg,
+                #ff0000 136.22deg 145.95deg,
+                #000000 145.95deg 155.68deg,
+                #ff0000 155.68deg 165.41deg,
+                #000000 165.41deg 175.14deg,
+                #ff0000 175.14deg 184.87deg,
+                #000000 184.87deg 194.6deg,
+                #ff0000 194.6deg 204.33deg,
+                #000000 204.33deg 214.06deg,
+                #ff0000 214.06deg 223.79deg,
+                #000000 223.79deg 233.52deg,
+                #ff0000 233.52deg 243.25deg,
+                #000000 243.25deg 252.98deg,
+                #ff0000 252.98deg 262.71deg,
+                #000000 262.71deg 272.44deg,
+                #ff0000 272.44deg 282.17deg,
+                #000000 282.17deg 291.9deg,
+                #ff0000 291.9deg 301.63deg,
+                #000000 301.63deg 311.36deg,
+                #ff0000 311.36deg 321.09deg,
+                #000000 321.09deg 330.82deg,
+                #ff0000 330.82deg 340.55deg,
+                #000000 340.55deg 350.28deg,
+                #ff0000 350.28deg 360deg
+            );
+            border: 8px solid #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+        .wheel.spinning {
+            transform: rotate(1800deg);
+        }
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #ffd700;
+            z-index: 10;
+        }
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: #ffd700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: #000;
+            z-index: 5;
+        }
+        .wheel-number {
+            position: absolute;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,1);
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.3);
+        }
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 5px;
+            margin: 20px 0;
+        }
+        .number-bet {
+            padding: 8px 4px;
+            font-size: 0.9em;
+            color: white;
+            border: 2px solid #666;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            min-height: 35px;
+        }
+        .number-bet.red {
+            background: linear-gradient(145deg, #ff4444, #cc3333);
+        }
+        .number-bet.black {
+            background: linear-gradient(145deg, #333333, #111111);
+        }
+        .number-bet.green {
+            background: linear-gradient(145deg, #00aa00, #008800);
+        }
+        .number-bet:hover:not(:disabled) {
+            transform: translateY(-2px);
+            border-color: #ffd700;
+        }
+        .number-bet.selected {
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        .bet-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 40px 0;
+        }
+        .bet-option {
+            padding: 15px 20px;
+            font-size: 1.1em;
+            background: linear-gradient(145deg, #4a4a4a, #2a2a2a);
+            color: white;
+            border: 2px solid #666;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .bet-option:hover:not(:disabled) {
+            transform: translateY(-2px);
+            border-color: #ffd700;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+        .bet-option.selected {
+            background: linear-gradient(145deg, #ffd700, #ffed4e);
+            color: #000;
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        .bet-option.red {
+            background: linear-gradient(145deg, #ff4444, #cc3333);
+        }
+        .bet-option.black {
+            background: linear-gradient(145deg, #333333, #111111);
+        }
+        .controls {
+            margin: 30px 0;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        input {
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #666;
+            border-radius: 10px;
+            width: 150px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        button {
+            padding: 15px 40px;
+            font-size: 1.3em;
+            background: linear-gradient(145deg, #ffd700, #ffed4e);
+            color: #000;
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .result {
+            font-size: 2.5em;
+            margin: 20px 0;
+            font-weight: bold;
+            min-height: 60px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 30px;
+            border-radius: 10px;
+        }
+        .stat-label {
+            font-size: 1em;
+            opacity: 0.8;
+        }
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .win { color: #00ff88; }
+        .lose { color: #ff4444; }
+    </style>
+</head>
+<body>
+    <button class="nav-btn" onclick="window.location.href='home.html'">🏠 HOME</button>
+
+    <div class="container">
+        <h1>🎪 ROLETA</h1>
+        
+        <div class="roulette-area">
+            <div class="pointer"></div>
+            <div class="wheel" id="wheel">
+                <div class="wheel-number" style="top: 25px; left: 50%; transform: translateX(-50%);">0</div>
+                <div class="wheel-number" style="top: 35px; right: 45px;">32</div>
+                <div class="wheel-number" style="top: 55px; right: 25px;">15</div>
+                <div class="wheel-number" style="top: 80px; right: 15px;">19</div>
+                <div class="wheel-number" style="top: 110px; right: 15px;">4</div>
+                <div class="wheel-number" style="top: 140px; right: 25px;">21</div>
+                <div class="wheel-number" style="top: 160px; right: 45px;">2</div>
+                <div class="wheel-number" style="bottom: 25px; left: 50%; transform: translateX(-50%);">25</div>
+                <div class="wheel-number" style="bottom: 35px; left: 45px;">17</div>
+                <div class="wheel-number" style="bottom: 55px; left: 25px;">34</div>
+                <div class="wheel-number" style="bottom: 80px; left: 15px;">6</div>
+                <div class="wheel-number" style="bottom: 110px; left: 15px;">27</div>
+                <div class="wheel-number" style="bottom: 140px; left: 25px;">13</div>
+                <div class="wheel-number" style="bottom: 160px; left: 45px;">36</div>
+                <div class="wheel-number" style="top: 80px; left: 15px;">11</div>
+                <div class="wheel-number" style="top: 110px; left: 15px;">30</div>
+                <div class="wheel-number" style="top: 140px; left: 25px;">8</div>
+                <div class="wheel-number" style="top: 160px; left: 45px;">23</div>
+                <div class="center-circle">🎪</div>
+            </div>
+        </div>
+
+        <div class="result" id="result">Escolha sua aposta!</div>
+
+        <div class="numbers-grid" id="numbersGrid">
+            <!-- Números serão gerados pelo JavaScript -->
+        </div>
+
+        <div class="bet-grid">
+            <button class="bet-option red" onclick="selectBet('vermelho')" id="btnVermelho">VERMELHO<br>2x</button>
+            <button class="bet-option black" onclick="selectBet('preto')" id="btnPreto">PRETO<br>2x</button>
+            <button class="bet-option" onclick="selectBet('par')" id="btnPar">PAR<br>2x</button>
+            <button class="bet-option" onclick="selectBet('impar')" id="btnImpar">ÍMPAR<br>2x</button>
+            <button class="bet-option" onclick="selectBet('baixo')" id="btnBaixo">1-18<br>2x</button>
+            <button class="bet-option" onclick="selectBet('alto')" id="btnAlto">19-36<br>2x</button>
+        </div>
+
+        <div class="controls">
+            <input type="number" id="betAmount" value="10" min="1" placeholder="Aposta">
+            <button id="spinBtn" onclick="spin()">GIRAR ROLETA</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">Saldo</div>
+                <div class="stat-value" id="balance">R$ 1000</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Aposta Atual</div>
+                <div class="stat-value" id="currentBet">Nenhuma</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Último Ganho</div>
+                <div class="stat-value" id="lastWin">R$ 0</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const redNumbers = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+        const blackNumbers = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35];
+        
+        let balance = 1000;
+        let selectedBet = null;
+        let selectedNumber = null;
+        let isSpinning = false;
+
+        // Gerar grid de números
+        function generateNumbersGrid() {
+            const numbersGrid = document.getElementById('numbersGrid');
+            
+            // Adicionar zero
+            const zeroBtn = document.createElement('button');
+            zeroBtn.className = 'number-bet green';
+            zeroBtn.textContent = '0';
+            zeroBtn.onclick = () => selectNumber(0);
+            zeroBtn.id = 'num0';
+            numbersGrid.appendChild(zeroBtn);
+            
+            // Adicionar números 1-36
+            for (let i = 1; i <= 36; i++) {
+                const btn = document.createElement('button');
+                btn.className = `number-bet ${redNumbers.includes(i) ? 'red' : 'black'}`;
+                btn.textContent = i;
+                btn.onclick = () => selectNumber(i);
+                btn.id = `num${i}`;
+                numbersGrid.appendChild(btn);
+            }
+        }
+
+        function selectNumber(number) {
+            if (isSpinning) return;
+            
+            // Remove seleção anterior
+            document.querySelectorAll('.number-bet').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelectorAll('.bet-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Seleciona número
+            document.getElementById(`num${number}`).classList.add('selected');
+            selectedBet = 'numero';
+            selectedNumber = number;
+            
+            document.getElementById('currentBet').textContent = `NÚMERO ${number}`;
+        }
+
+        function selectBet(betType) {
+            if (isSpinning) return;
+            
+            // Remove seleção anterior
+            document.querySelectorAll('.bet-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelectorAll('.number-bet').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            document.getElementById(`btn${betType.charAt(0).toUpperCase() + betType.slice(1)}`).classList.add('selected');
+            selectedBet = betType;
+            selectedNumber = null;
+            
+            const betNames = {
+                'vermelho': 'VERMELHO',
+                'preto': 'PRETO', 
+                'par': 'PAR',
+                'impar': 'ÍMPAR',
+                'baixo': '1-18',
+                'alto': '19-36'
+            };
+            
+            document.getElementById('currentBet').textContent = betNames[betType];
+        }
+
+        function spin() {
+            if (isSpinning || !selectedBet) {
+                if (!selectedBet) {
+                    showResult('Escolha uma aposta primeiro!', 'lose');
+                }
+                return;
+            }
+
+            const bet = parseFloat(document.getElementById('betAmount').value);
+            if (bet <= 0 || bet > balance) {
+                showResult('Aposta inválida!', 'lose');
+                return;
+            }
+
+            balance -= bet;
+            updateBalance();
+            isSpinning = true;
+            document.getElementById('spinBtn').disabled = true;
+
+            const wheel = document.getElementById('wheel');
+            wheel.classList.add('spinning');
+
+            setTimeout(() => {
+                const result = Math.floor(Math.random() * 37); // 0-36
+                wheel.classList.remove('spinning');
+                
+                checkWin(result, bet);
+                
+                isSpinning = false;
+                document.getElementById('spinBtn').disabled = false;
+            }, 3000);
+        }
+
+        function checkWin(number, bet) {
+            let won = false;
+            let multiplier = 0;
+            let message = '';
+
+            const isRed = redNumbers.includes(number);
+            const isBlack = blackNumbers.includes(number);
+            const isEven = number > 0 && number % 2 === 0;
+            const isOdd = number > 0 && number % 2 === 1;
+
+            switch(selectedBet) {
+                case 'vermelho':
+                    won = isRed;
+                    multiplier = 2;
+                    message = `🎪 ${number} ${isRed ? '(VERMELHO)' : isBlack ? '(PRETO)' : '(ZERO)'}`;
+                    break;
+                case 'preto':
+                    won = isBlack;
+                    multiplier = 2;
+                    message = `🎪 ${number} ${isBlack ? '(PRETO)' : isRed ? '(VERMELHO)' : '(ZERO)'}`;
+                    break;
+                case 'par':
+                    won = isEven;
+                    multiplier = 2;
+                    message = `🎪 ${number} ${number === 0 ? '(ZERO)' : isEven ? '(PAR)' : '(ÍMPAR)'}`;
+                    break;
+                case 'impar':
+                    won = isOdd;
+                    multiplier = 2;
+                    message = `🎪 ${number} ${number === 0 ? '(ZERO)' : isOdd ? '(ÍMPAR)' : '(PAR)'}`;
+                    break;
+                case 'baixo':
+                    won = number >= 1 && number <= 18;
+                    multiplier = 2;
+                    message = `🎪 ${number} ${number === 0 ? '(ZERO)' : number <= 18 ? '(BAIXO)' : '(ALTO)'}`;
+                    break;
+                case 'alto':
+                    won = number >= 19 && number <= 36;
+                    multiplier = 2;
+                    message = `🎪 ${number} ${number === 0 ? '(ZERO)' : number >= 19 ? '(ALTO)' : '(BAIXO)'}`;
+                    break;
+                case 'numero':
+                    won = number === selectedNumber;
+                    multiplier = 36;
+                    message = `🎪 ${number} ${won ? '(SEU NÚMERO!)' : ''}`;
+                    break;
+            }
+
+            let winAmount = 0;
+            if (won) {
+                winAmount = bet * multiplier;
+                balance += winAmount;
+                showResult(`${message} - Ganhou R$ ${winAmount.toFixed(2)}!`, 'win');
+            } else {
+                showResult(`${message} - Perdeu!`, 'lose');
+            }
+
+            document.getElementById('lastWin').textContent = `R$ ${winAmount.toFixed(2)}`;
+            updateBalance();
+        }
+
+        function updateBalance() {
+            document.getElementById('balance').textContent = `R$ ${balance.toFixed(2)}`;
+        }
+
+        function showResult(text, type) {
+            const result = document.getElementById('result');
+            result.textContent = text;
+            result.className = `result ${type}`;
+        }
+
+        // Inicializar
+        generateNumbersGrid();
+    </script>
+</body>
+</html>
