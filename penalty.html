@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Pênalti</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e5128 0%, #4e9f3d 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            max-width: 700px;
+            width: 100%;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        .nav-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .nav-btn {
+            padding: 10px 20px;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: transform 0.2s;
+        }
+        .nav-btn:hover {
+            transform: scale(1.05);
+        }
+        .field {
+            background: linear-gradient(to bottom, #2d5016 0%, #4a7c2c 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            position: relative;
+            height: 450px;
+            border: 3px solid white;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .field::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .goal {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 350px;
+            height: 180px;
+            border: 6px solid white;
+            border-bottom: none;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.2));
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .goal-section {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            position: relative;
+        }
+        .goal-section:hover {
+            background: rgba(0, 255, 136, 0.2);
+            transform: scale(1.05);
+        }
+        .goal-section.selected {
+            background: rgba(0, 255, 136, 0.3);
+            border-color: #00ff88;
+        }
+        .ball {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3.5em;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.5));
+        }
+        .goalkeeper {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 4.5em;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.5));
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        input {
+            padding: 12px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            width: 150px;
+            text-align: center;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        button:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-shoot {
+            background: #00ff88;
+            color: #000;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .message {
+            margin-top: 15px;
+            font-size: 1.3em;
+            min-height: 40px;
+            font-weight: bold;
+        }
+        .win {
+            color: #00ff88;
+        }
+        .lose {
+            color: #ff4444;
+        }
+        .instruction {
+            font-size: 1.1em;
+            margin: 15px 0;
+            color: #ffd700;
+        }
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #f0f;
+            position: absolute;
+            animation: confetti-fall 3s linear forwards;
+        }
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="window.location.href='home.html'">🏠 HOME</button>
+    </div>
+
+    <div class="container">
+        <h1>⚽ JOGO DE PÊNALTI</h1>
+        
+        <div class="instruction">Escolha onde chutar clicando no gol!</div>
+
+        <div class="field">
+            <div class="goal">
+                <div class="goal-section" onclick="selectPosition(0)" id="pos-0"></div>
+                <div class="goal-section" onclick="selectPosition(1)" id="pos-1"></div>
+                <div class="goal-section" onclick="selectPosition(2)" id="pos-2"></div>
+            </div>
+            <div class="goalkeeper" id="goalkeeper">🧤</div>
+            <div class="ball" id="ball">⚽</div>
+        </div>
+
+        <div class="controls">
+            <input type="number" id="betAmount" value="10" min="1" placeholder="Aposta">
+            <button class="btn-shoot" id="shootBtn" onclick="shoot()" disabled>CHUTAR</button>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-label">Saldo</span>
+                <span class="stat-value" id="balance">R$ 0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Posição Escolhida</span>
+                <span class="stat-value" id="selectedPos">-</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Último Ganho</span>
+                <span class="stat-value" id="lastWin">R$ 0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:4000/api/penalty';
+        let selectedPosition = null;
+        let isShooting = false;
+
+        const positionNames = ['Esquerda', 'Centro', 'Direita'];
+
+        async function checkServer() {
+            try {
+                const response = await fetch(`${API_URL}/status`);
+                const data = await response.json();
+                updateBalance(data.balance);
+                return true;
+            } catch (error) {
+                showMessage('Servidor Offline!', 'lose');
+                return false;
+            }
+        }
+
+        function selectPosition(position) {
+            if (isShooting) return;
+            
+            selectedPosition = position;
+            
+            document.querySelectorAll('.goal-section').forEach((section, index) => {
+                if (index === position) {
+                    section.classList.add('selected');
+                } else {
+                    section.classList.remove('selected');
+                }
+            });
+            
+            document.getElementById('selectedPos').textContent = positionNames[position];
+            document.getElementById('shootBtn').disabled = false;
+        }
+
+        async function shoot() {
+            if (selectedPosition === null || isShooting) return;
+            
+            const betAmount = parseFloat(document.getElementById('betAmount').value);
+            
+            try {
+                isShooting = true;
+                document.getElementById('shootBtn').disabled = true;
+                document.getElementById('message').textContent = '';
+                
+                const response = await fetch(`${API_URL}/shoot`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bet: betAmount, position: selectedPosition })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    showMessage('Aposta inválida!', 'lose');
+                    isShooting = false;
+                    return;
+                }
+
+                const ball = document.getElementById('ball');
+                const goalkeeper = document.getElementById('goalkeeper');
+                
+                const positions = [
+                    { left: '25%', top: '100px' },
+                    { left: '50%', top: '100px' },
+                    { left: '75%', top: '100px' }
+                ];
+                
+                // Animar chute da bola
+                ball.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                ball.style.bottom = '280px';
+                ball.style.left = positions[data.playerPosition].left;
+                ball.style.transform = 'translateX(-50%) scale(0.8)';
+                
+                // Animar goleiro
+                setTimeout(() => {
+                    goalkeeper.style.left = positions[data.goalkeeperPosition].left;
+                    goalkeeper.style.transform = 'translateX(-50%) rotate(' + (data.goalkeeperPosition === 0 ? '-15deg' : data.goalkeeperPosition === 2 ? '15deg' : '0deg') + ')';
+                    
+                    setTimeout(() => {
+                        if (data.scored) {
+                            showMessage(`⚽ GOOOOL! Você ganhou R$ ${data.winAmount.toFixed(2)}!`, 'win');
+                            document.getElementById('lastWin').textContent = `R$ ${data.winAmount.toFixed(2)}`;
+                            document.getElementById(`pos-${data.playerPosition}`).textContent = '⚽';
+                            ball.style.opacity = '0';
+                            createConfetti();
+                        } else {
+                            showMessage('🧤 DEFESA! O goleiro pegou!', 'lose');
+                            document.getElementById('lastWin').textContent = 'R$ 0.00';
+                            document.getElementById(`pos-${data.goalkeeperPosition}`).textContent = '🧤';
+                        }
+                        
+                        updateBalance(data.balance);
+                        
+                        setTimeout(() => {
+                            ball.style.transition = 'all 0.3s ease';
+                            ball.style.bottom = '80px';
+                            ball.style.left = '50%';
+                            ball.style.transform = 'translateX(-50%) scale(1)';
+                            ball.style.opacity = '1';
+                            goalkeeper.style.left = '50%';
+                            goalkeeper.style.transform = 'translateX(-50%) rotate(0deg)';
+                            document.querySelectorAll('.goal-section').forEach(section => {
+                                section.textContent = '';
+                                section.classList.remove('selected');
+                            });
+                            selectedPosition = null;
+                            document.getElementById('selectedPos').textContent = '-';
+                            isShooting = false;
+                        }, 2500);
+                    }, 500);
+                }, 300);
+                
+            } catch (error) {
+                showMessage('Erro ao conectar com servidor!', 'lose');
+                isShooting = false;
+            }
+        }
+
+        function updateBalance(balance) {
+            document.getElementById('balance').textContent = `R$ ${balance.toFixed(2)}`;
+        }
+
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+        }
+
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffa500'];
+            const field = document.querySelector('.field');
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = '0';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    field.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 30);
+            }
+        }
+
+        checkServer();
+    </script>
+</body>
+</html>

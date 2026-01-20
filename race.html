@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corrida de Cavalos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c2c 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            max-width: 900px;
+            width: 100%;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        .nav-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: transform 0.2s;
+        }
+        .nav-btn:hover {
+            transform: scale(1.05);
+        }
+        .track {
+            background: linear-gradient(to bottom, #2d5016 0%, #4a7c2c 50%, #2d5016 100%);
+            border-radius: 15px;
+            padding: 30px 20px;
+            margin: 20px 0;
+            position: relative;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.3);
+            border: 3px solid #8B4513;
+        }
+        .track::before {
+            content: '🌳🌳🌳🌳🌳🌳🌳🌳🌳🌳';
+            position: absolute;
+            top: -25px;
+            left: 0;
+            right: 0;
+            font-size: 1.5em;
+            opacity: 0.6;
+        }
+        .track::after {
+            content: '👥👥👥👥👥👥👥👥👥👥';
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            right: 0;
+            font-size: 1.2em;
+            opacity: 0.7;
+        }
+        .lane {
+            background: linear-gradient(to right, rgba(76, 175, 80, 0.3), rgba(139, 195, 74, 0.4), rgba(76, 175, 80, 0.3));
+            height: 70px;
+            margin: 10px 0;
+            border-radius: 8px;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .lane::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: repeating-linear-gradient(
+                to right,
+                white 0px,
+                white 20px,
+                transparent 20px,
+                transparent 40px
+            );
+            opacity: 0.3;
+        }
+        .horse {
+            position: absolute;
+            left: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3em;
+            transition: left 0.1s linear;
+            filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.6));
+            animation: gallop 0.2s infinite;
+            z-index: 10;
+        }
+        @keyframes gallop {
+            0%, 100% { transform: translateY(-50%) rotate(0deg) scale(1); }
+            25% { transform: translateY(-55%) rotate(-3deg) scale(1.05); }
+            50% { transform: translateY(-50%) rotate(0deg) scale(1); }
+            75% { transform: translateY(-45%) rotate(3deg) scale(1.05); }
+        }
+        .lane-number {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        .finish-line {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 40px;
+            background: repeating-linear-gradient(
+                45deg,
+                white,
+                white 12px,
+                black 12px,
+                black 24px
+            );
+            opacity: 0.7;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.5);
+        }
+        .horse-selection {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .horse-btn {
+            padding: 15px;
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border: 3px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.5em;
+            transition: all 0.3s;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .horse-btn:hover {
+            transform: scale(1.05);
+            border-color: #ffd700;
+            box-shadow: 0 6px 12px rgba(255, 215, 0, 0.4);
+        }
+        .horse-btn.selected {
+            border-color: #00ff88;
+            background: linear-gradient(145deg, #00ff88, #00cc6a);
+            color: #000;
+            box-shadow: 0 6px 12px rgba(0, 255, 136, 0.5);
+            animation: selectedPulse 1.5s infinite;
+        }
+        @keyframes selectedPulse {
+            0%, 100% { box-shadow: 0 6px 12px rgba(0, 255, 136, 0.5); }
+            50% { box-shadow: 0 6px 20px rgba(0, 255, 136, 0.8); }
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        input {
+            padding: 12px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            width: 150px;
+            text-align: center;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        button:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-start {
+            background: #00ff88;
+            color: #000;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .message {
+            margin-top: 15px;
+            font-size: 1.2em;
+            min-height: 30px;
+            font-weight: bold;
+        }
+        .win {
+            color: #00ff88;
+        }
+        .lose {
+            color: #ff4444;
+        }
+        .winner-badge {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+            animation: bounce 0.5s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-50%) scale(1); }
+            50% { transform: translateY(-50%) scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="nav-btn" onclick="window.location.href='home.html'">🏠 HOME</button>
+        <h1>🏇 CORRIDA DE CAVALOS</h1>
+        
+        <div class="horse-selection" id="horseSelection">
+            <button class="horse-btn" onclick="selectHorse(0)">🏇 Cavalo 1</button>
+            <button class="horse-btn" onclick="selectHorse(1)">🏇 Cavalo 2</button>
+            <button class="horse-btn" onclick="selectHorse(2)">🏇 Cavalo 3</button>
+            <button class="horse-btn" onclick="selectHorse(3)">🏇 Cavalo 4</button>
+            <button class="horse-btn" onclick="selectHorse(4)">🏇 Cavalo 5</button>
+            <button class="horse-btn" onclick="selectHorse(5)">🏇 Cavalo 6</button>
+        </div>
+
+        <div class="track">
+            <div class="finish-line"></div>
+            <div class="lane"><span class="lane-number">1</span><div class="horse" id="horse-0">🏇</div></div>
+            <div class="lane"><span class="lane-number">2</span><div class="horse" id="horse-1">🏇</div></div>
+            <div class="lane"><span class="lane-number">3</span><div class="horse" id="horse-2">🏇</div></div>
+            <div class="lane"><span class="lane-number">4</span><div class="horse" id="horse-3">🏇</div></div>
+            <div class="lane"><span class="lane-number">5</span><div class="horse" id="horse-4">🏇</div></div>
+            <div class="lane"><span class="lane-number">6</span><div class="horse" id="horse-5">🏇</div></div>
+        </div>
+
+        <div class="controls">
+            <input type="number" id="betAmount" value="10" min="1" placeholder="Aposta">
+            <button class="btn-start" id="startBtn" onclick="startRace()">APOSTAR E CORRER</button>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-label">Saldo</span>
+                <span class="stat-value" id="balance">R$ 0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Cavalo Selecionado</span>
+                <span class="stat-value" id="selectedHorse">-</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Último Ganho</span>
+                <span class="stat-value" id="lastWin">R$ 0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/race';
+        let isRacing = false;
+        let selectedHorse = null;
+        let raceInterval;
+
+        async function checkServer() {
+            try {
+                const response = await fetch(`${API_URL}/status`);
+                const data = await response.json();
+                updateBalance(data.balance);
+                return true;
+            } catch (error) {
+                showMessage('Servidor Offline!', 'lose');
+                return false;
+            }
+        }
+
+        function selectHorse(horseNumber) {
+            if (isRacing) return;
+            
+            selectedHorse = horseNumber;
+            document.querySelectorAll('.horse-btn').forEach((btn, index) => {
+                btn.classList.toggle('selected', index === horseNumber);
+            });
+            document.getElementById('selectedHorse').textContent = `Cavalo ${horseNumber + 1}`;
+        }
+
+        async function startRace() {
+            if (selectedHorse === null) {
+                showMessage('Selecione um cavalo!', 'lose');
+                return;
+            }
+
+            const betAmount = parseFloat(document.getElementById('betAmount').value);
+            
+            try {
+                const response = await fetch(`${API_URL}/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bet: betAmount, horse: selectedHorse })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    showMessage('Aposta inválida!', 'lose');
+                    return;
+                }
+
+                isRacing = true;
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('betAmount').disabled = true;
+                document.getElementById('message').textContent = '';
+                
+                // Reset horses
+                for (let i = 0; i < 6; i++) {
+                    document.getElementById(`horse-${i}`).style.left = '40px';
+                }
+                
+                updateBalance(data.balance);
+                raceInterval = setInterval(updateRace, 100);
+            } catch (error) {
+                showMessage('Erro ao conectar com servidor!', 'lose');
+            }
+        }
+
+        async function updateRace() {
+            try {
+                const response = await fetch(`${API_URL}/update`);
+                const data = await response.json();
+                
+                if (!data.finished) {
+                    data.horses.forEach(horse => {
+                        const horseEl = document.getElementById(`horse-${horse.id}`);
+                        const position = 40 + (horse.position * 7.5);
+                        horseEl.style.left = `${Math.min(position, 800)}px`;
+                    });
+                } else {
+                    clearInterval(raceInterval);
+                    
+                    data.horses.forEach(horse => {
+                        const horseEl = document.getElementById(`horse-${horse.id}`);
+                        const position = 40 + (horse.position * 7.5);
+                        horseEl.style.left = `${Math.min(position, 800)}px`;
+                    });
+                    
+                    const winnerLane = document.querySelectorAll('.lane')[data.winner];
+                    const badge = document.createElement('div');
+                    badge.className = 'winner-badge';
+                    badge.textContent = '🏆';
+                    winnerLane.appendChild(badge);
+                    
+                    if (data.winner === selectedHorse) {
+                        showMessage(`Cavalo ${data.winner + 1} venceu! Você ganhou R$ ${data.winAmount.toFixed(2)}!`, 'win');
+                        document.getElementById('lastWin').textContent = `R$ ${data.winAmount.toFixed(2)}`;
+                    } else {
+                        showMessage(`Cavalo ${data.winner + 1} venceu! Você perdeu!`, 'lose');
+                        document.getElementById('lastWin').textContent = 'R$ 0.00';
+                    }
+                    
+                    updateBalance(data.balance);
+                    
+                    setTimeout(() => {
+                        isRacing = false;
+                        document.getElementById('startBtn').disabled = false;
+                        document.getElementById('betAmount').disabled = false;
+                        badge.remove();
+                    }, 3000);
+                }
+            } catch (error) {
+                clearInterval(raceInterval);
+                showMessage('vc perdeu crash!', 'lose');
+            }
+        }
+
+        function updateBalance(balance) {
+            document.getElementById('balance').textContent = `R$ ${balance.toFixed(2)}`;
+        }
+
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+        }
+
+        checkServer();
+    </script>
+</body>
+</html>

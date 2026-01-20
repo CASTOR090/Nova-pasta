@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Luta</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        .nav-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .nav-btn:hover {
+            transform: scale(1.05);
+        }
+        .character-selection {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .players-selection {
+            display: flex;
+            gap: 50px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .player-section {
+            flex: 1;
+        }
+        .player-section h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        .player-section .character-card {
+            padding: 20px;
+        }
+        .player-section .character-icon {
+            font-size: 3em;
+        }
+        .player-section .character-name {
+            font-size: 1em;
+        }
+        .name-input {
+            margin-top: 15px;
+            padding: 10px;
+            font-size: 1em;
+            border: 2px solid #00ff88;
+            border-radius: 8px;
+            width: 200px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+        }
+        .character-card {
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            padding: 30px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+        .character-card:hover {
+            transform: scale(1.05);
+            border-color: #ffd700;
+        }
+        .character-card.selected {
+            border-color: #00ff88;
+            background: linear-gradient(145deg, #00ff88, #00cc6a);
+        }
+        .character-icon {
+            font-size: 5em;
+        }
+        .character-name {
+            font-size: 1.5em;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .arena {
+            background: linear-gradient(to bottom, #34495e 0%, #2c3e50 100%);
+            border-radius: 15px;
+            padding: 40px;
+            margin: 30px 0;
+            min-height: 400px;
+            display: none;
+            position: relative;
+        }
+        .arena.active {
+            display: block;
+        }
+        .fighters {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 400px;
+            position: relative;
+        }
+        .fighter-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .fighter {
+            font-size: 8em;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .punch-button {
+            padding: 20px 40px;
+            font-size: 1.5em;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 68, 68, 0.4);
+        }
+        #player2Btn {
+            background: #4444ff;
+            box-shadow: 0 5px 15px rgba(68, 68, 255, 0.4);
+        }
+        .punch-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(255, 68, 68, 0.6);
+        }
+        #player2Btn:hover {
+            box-shadow: 0 8px 25px rgba(68, 68, 255, 0.6);
+        }
+        .special-button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #000;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+            margin-top: 10px;
+        }
+        .special-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6);
+        }
+        .special-effect {
+            position: absolute;
+            font-size: 5em;
+            animation: specialEffect 1s forwards;
+            pointer-events: none;
+            z-index: 10;
+        }
+        @keyframes specialEffect {
+            0% {
+                opacity: 1;
+                transform: scale(0.3) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.5) rotate(180deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(2) rotate(360deg);
+            }
+        }
+        .punch-effect {
+            position: absolute;
+            font-size: 4em;
+            animation: punchEffect 0.6s forwards;
+            pointer-events: none;
+            z-index: 10;
+        }
+        @keyframes punchEffect {
+            0% {
+                opacity: 1;
+                transform: scale(0.5) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2) rotate(10deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.5) rotate(20deg);
+            }
+        }
+        .fighter.punch {
+            animation: punch 0.5s;
+        }
+        .fighter.hit {
+            animation: hit 0.5s;
+        }
+        .fighter.enemy-punch {
+            animation: enemyPunch 0.5s;
+        }
+        .fighter.player-hit {
+            animation: playerHit 0.5s;
+        }
+        @keyframes punch {
+            0%, 100% { transform: translateX(0) scale(1); }
+            30% { transform: translateX(50px) scale(1.1); }
+            60% { transform: translateX(40px) scale(1.05); }
+        }
+        @keyframes hit {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            20% { transform: translateX(-30px) rotate(-15deg); }
+            40% { transform: translateX(-20px) rotate(10deg); }
+            60% { transform: translateX(-10px) rotate(-5deg); }
+        }
+        @keyframes enemyPunch {
+            0%, 100% { transform: translateX(0) scale(1); }
+            30% { transform: translateX(-50px) scale(1.1); }
+            60% { transform: translateX(-40px) scale(1.05); }
+        }
+        @keyframes playerHit {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            20% { transform: translateX(30px) rotate(15deg); }
+            40% { transform: translateX(20px) rotate(-10deg); }
+            60% { transform: translateX(10px) rotate(5deg); }
+        }
+        .health-bars {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .health-bar {
+            width: 45%;
+        }
+        .health-label {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .health-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00ff88;
+        }
+        .health-value.low {
+            color: #ff4444;
+        }
+        .health-bg {
+            background: #333;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .health-fill {
+            background: linear-gradient(to right, #00ff88, #00cc6a);
+            height: 100%;
+            transition: width 0.3s;
+        }
+        .health-fill.low {
+            background: linear-gradient(to right, #ff4444, #cc0000);
+        }
+        .btn-start {
+            background: #00ff88;
+            color: #000;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .btn-start:hover {
+            transform: scale(1.05);
+        }
+        .btn-start:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .message {
+            font-size: 1.5em;
+            margin: 20px 0;
+            font-weight: bold;
+            min-height: 50px;
+        }
+        .controls-info {
+            font-size: 0.85em;
+            margin: 10px 0;
+            color: #ffd700;
+            opacity: 0.9;
+        }
+        .win {
+            color: #00ff88;
+        }
+        .lose {
+            color: #ff4444;
+        }
+    </style>
+</head>
+<body>
+    <button class="nav-btn" onclick="window.location.href='home.html'">🏠 HOME</button>
+
+    <div class="container">
+        <h1>🥊 JOGO DE LUTA</h1>
+        
+        <div id="selection">
+            <h2>Escolha o modo:</h2>
+            <div class="character-selection">
+                <div class="character-card" onclick="selectMode('cpu')">
+                    <div class="character-icon">🤖</div>
+                    <div class="character-name">VS CPU</div>
+                </div>
+                <div class="character-card" onclick="selectMode('player')">
+                    <div class="character-icon">👥</div>
+                    <div class="character-name">2 JOGADORES</div>
+                </div>
+            </div>
+            <button class="btn-start" id="startBtn" onclick="startFight()" disabled>COMEÇAR LUTA</button>
+        </div>
+
+        <div id="characterSelection" style="display: none;">
+            <h2>ESCOLHA SEUS PERSONAGENS:</h2>
+            <div class="players-selection">
+                <div class="player-section">
+                    <h3>🔴 JOGADOR 1</h3>
+                    <div class="character-selection">
+                        <div class="character-card" onclick="selectCharacter(1, '🤖', 'ROBÔ')">
+                            <div class="character-icon">🤖</div>
+                            <div class="character-name">ROBÔ</div>
+                        </div>
+                        <div class="character-card" onclick="selectCharacter(1, '🥷', 'NINJA')">
+                            <div class="character-icon">🥷</div>
+                            <div class="character-name">NINJA</div>
+                        </div>
+                        <div class="character-card" onclick="selectCharacter(1, '🤠', 'COWBOY')">
+                            <div class="character-icon">🤠</div>
+                            <div class="character-name">COWBOY</div>
+                        </div>
+                        <div class="character-card" onclick="selectCharacter(1, '🧙', 'MAGO')">
+                            <div class="character-icon">🧙</div>
+                            <div class="character-name">MAGO</div>
+                        </div>
+                        <div class="character-card" onclick="selectCharacter(1, '🧛', 'VAMPIRO')">
+                            <div class="character-icon">🧛</div>
+                            <div class="character-name">VAMPIRO</div>
+                        </div>
+                        <div class="character-card" onclick="selectCharacter(1, '🧟', 'ZUMBI')">
+                            <div class="character-icon">🧟</div>
+                            <div class="character-name">ZUMBI</div>
+                        </div>
+                    </div>
+                    <input type="text" id="player1NameInput" class="name-input" placeholder="Digite seu nome" maxlength="15">
+                </div>
+                <div class="player-section">
+                    <h3>🔵 JOGADOR 2</h3>
+                    <div class="character-selection">
+                        <div class="character-card" onclick="selectCharacter(2, '🤖', 'ROBÔ')">
+                            <div class="character-icon">🤖</div>
+                            <div class="character-name">ROBÔ</div>
+                        </div>
+                        <div class="character-card" onclick="selectCharacter(2, '🥷', 'NINJA')">
+                            <div class="character-icon">🥷</div>
+                            <div class="character-name">NINJA</div>
+                        </div>
+                        <div class="character-card" onclick="selectCharacter(2, '🤠', 'COWBOY')">
+                            <div class="character-icon">🤠</div>
+                            <div class="character-name">COWBOY</div>
+                        </div>
+                        <div class="character-card" onclick="selectCharacter(2, '🧙', 'MAGO')">
+                            <div class="character-icon">🧙</div>
+                            <div class="character-name">MAGO</div>
+                        </div>
+                        <div class="character-card" onclick="selectCharacter(2, '🧛', 'VAMPIRO')">
+                            <div class="character-icon">🧛</div>
+                            <div class="character-name">VAMPIRO</div>
+                        </div>
+                        <div class="character-card" onclick="selectCharacter(2, '🧟', 'ZUMBI')">
+                            <div class="character-icon">🧟</div>
+                            <div class="character-name">ZUMBI</div>
+                        </div>
+                    </div>
+                    <input type="text" id="player2NameInput" class="name-input" placeholder="Digite seu nome" maxlength="15">
+                </div>
+            </div>
+            <button class="btn-start" id="confirmBtn" onclick="confirmCharacters()" style="display: none; margin-top: 20px;">COMEÇAR LUTA</button>
+        </div>
+
+        <div class="arena" id="arena">
+            <div class="health-bars">
+                <div class="health-bar">
+                    <div class="health-label">
+                        <span id="playerName">JOGADOR 1</span>
+                        <span class="health-value" id="playerHealthText">200</span>
+                    </div>
+                    <div class="health-bg">
+                        <div class="health-fill" id="playerHealth" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="health-bar">
+                    <div class="health-label">
+                        <span id="enemyName">JOGADOR 2</span>
+                        <span class="health-value" id="enemyHealthText">200</span>
+                    </div>
+                    <div class="health-bg">
+                        <div class="health-fill" id="enemyHealth" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fighters">
+                <div class="fighter-container">
+                    <div class="fighter" id="player">🤖</div>
+                    <button class="punch-button" id="player1Btn" onclick="player1Punch()">🖱️ JOGADOR 1</button>
+                </div>
+                <div class="fighter-container">
+                    <div class="fighter" id="enemy">🥷</div>
+                    <button class="punch-button" id="player2Btn" onclick="player2Punch()" style="display: none;">⌨️ JOGADOR 2</button>
+                </div>
+            </div>
+
+            <div class="controls-info" id="controlsInfo" style="display: none;">
+                Jogador 1: 🖱️ Clique ou ⏎ Enter (Especial 2x) | Jogador 2: ␣ ESPAÇO ou ⇧ Shift (Especial 2x)
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gameMode = null;
+        let playerHealth = 200;
+        let enemyHealth = 200;
+        let isPlaying = false;
+        let canPunch = true;
+        let player1Turn = true;
+        let player1Character = null;
+        let player2Character = null;
+        let player1Name = '';
+        let player2Name = '';
+        let player1SpecialCount = 2;
+        let player2SpecialCount = 2;
+
+        const specialAttacks = {
+            'ROBÔ': { emoji: '⚡', damage: 30, effect: 'Raio Laser' },
+            'NINJA': { emoji: '🌀', damage: 25, effect: 'Shuriken' },
+            'COWBOY': { emoji: '🔫', damage: 35, effect: 'Tiro Certeiro' },
+            'MAGO': { emoji: '🔮', damage: 40, effect: 'Bola de Fogo' },
+            'VAMPIRO': { emoji: '🦇', damage: 28, effect: 'Mordida Vampírica' },
+            'ZUMBI': { emoji: '☠️', damage: 32, effect: 'Infecção' }
+        };
+
+        function selectMode(mode) {
+            gameMode = mode;
+            document.querySelectorAll('#selection .character-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.character-card').classList.add('selected');
+            
+            if (mode === 'player') {
+                document.getElementById('startBtn').style.display = 'none';
+                setTimeout(() => {
+                    document.getElementById('selection').style.display = 'none';
+                    document.getElementById('characterSelection').style.display = 'block';
+                }, 300);
+            } else {
+                document.getElementById('startBtn').disabled = false;
+            }
+        }
+
+        function selectCharacter(player, emoji, name) {
+            if (player === 1) {
+                player1Character = emoji;
+                player1Name = name;
+                document.querySelectorAll('.player-section:first-child .character-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                event.target.closest('.character-card').classList.add('selected');
+                document.getElementById('player1NameInput').style.display = 'block';
+            } else {
+                player2Character = emoji;
+                player2Name = name;
+                document.querySelectorAll('.player-section:last-child .character-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                event.target.closest('.character-card').classList.add('selected');
+                document.getElementById('player2NameInput').style.display = 'block';
+            }
+            
+            if (player1Character && player2Character) {
+                document.getElementById('confirmBtn').style.display = 'block';
+            }
+        }
+
+        function confirmCharacters() {
+            const p1Name = document.getElementById('player1NameInput').value.trim();
+            const p2Name = document.getElementById('player2NameInput').value.trim();
+            
+            if (p1Name) player1Name = p1Name;
+            if (p2Name) player2Name = p2Name;
+            
+            if (player1Character && player2Character) {
+                document.getElementById('characterSelection').style.display = 'none';
+                startFight();
+            }
+        }
+
+        function startFight() {
+            if (gameMode === null) return;
+            
+            isPlaying = true;
+            playerHealth = 200;
+            enemyHealth = 200;
+            canPunch = true;
+            player1Turn = true;
+            player1SpecialCount = 2;
+            player2SpecialCount = 2;
+            
+            document.getElementById('selection').style.display = 'none';
+            document.getElementById('arena').classList.add('active');
+            
+            if (gameMode === 'player') {
+                document.getElementById('player').textContent = player1Character;
+                document.getElementById('enemy').textContent = player2Character;
+                document.getElementById('playerName').textContent = player1Name;
+                document.getElementById('enemyName').textContent = player2Name;
+                document.getElementById('player1Btn').textContent = '🖱️ ' + player1Name;
+                document.getElementById('player2Btn').textContent = '⌨️ ' + player2Name;
+                document.getElementById('player2Btn').style.display = 'block';
+                document.getElementById('controlsInfo').style.display = 'block';
+                document.addEventListener('keydown', handleKeyPress);
+            } else {
+                document.getElementById('player').textContent = '🤖';
+                document.getElementById('enemy').textContent = '🥷';
+                document.getElementById('player1Btn').textContent = '👊 SOCAR';
+                document.getElementById('playerName').textContent = 'JOGADOR 1';
+                document.getElementById('enemyName').textContent = 'CPU';
+            }
+            
+            updateHealthBars();
+        }
+
+        function handleKeyPress(e) {
+            if (gameMode === 'player') {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    player2Punch();
+                } else if (e.code === 'Enter') {
+                    e.preventDefault();
+                    player1Special();
+                } else if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+                    e.preventDefault();
+                    player2Special();
+                }
+            }
+        }
+
+        function player1Special() {
+            if (gameMode === 'cpu' || !isPlaying || !player1Turn || player1SpecialCount <= 0) return;
+            document.getElementById('player1Btn').textContent = '⚡ ' + player1Name;
+            setTimeout(() => {
+                document.getElementById('player1Btn').textContent = '🖱️ ' + player1Name;
+            }, 1000);
+            specialAttack('player', 'enemy', player1Name);
+            player1SpecialCount--;
+            player1Turn = false;
+        }
+
+        function player2Special() {
+            if (!isPlaying || player1Turn || gameMode !== 'player' || player2SpecialCount <= 0) return;
+            document.getElementById('player2Btn').textContent = '⚡ ' + player2Name;
+            setTimeout(() => {
+                document.getElementById('player2Btn').textContent = '⌨️ ' + player2Name;
+            }, 1000);
+            specialAttack('enemy', 'player', player2Name);
+            player2SpecialCount--;
+            player1Turn = true;
+        }
+
+        function specialAttack(attacker, defender, characterName) {
+            const attackerEl = document.getElementById(attacker);
+            const defenderEl = document.getElementById(defender);
+            const fighters = document.querySelector('.fighters');
+            const special = specialAttacks[characterName];
+            
+            attackerEl.classList.add(attacker === 'player' ? 'punch' : 'enemy-punch');
+            defenderEl.classList.add(defender === 'player' ? 'player-hit' : 'hit');
+            
+            const specialEffect = document.createElement('div');
+            specialEffect.className = 'special-effect';
+            specialEffect.textContent = special.emoji;
+            specialEffect.style.left = attacker === 'player' ? '55%' : '40%';
+            specialEffect.style.top = '35%';
+            fighters.appendChild(specialEffect);
+            
+            setTimeout(() => specialEffect.remove(), 1000);
+            
+            if (defender === 'enemy') {
+                enemyHealth = Math.max(0, enemyHealth - special.damage);
+            } else {
+                playerHealth = Math.max(0, playerHealth - special.damage);
+            }
+            
+            setTimeout(() => {
+                attackerEl.classList.remove('punch', 'enemy-punch');
+                defenderEl.classList.remove('hit', 'player-hit');
+            }, 500);
+            
+            updateHealthBars();
+            
+            if (enemyHealth <= 0) {
+                endGame(true);
+            } else if (playerHealth <= 0) {
+                endGame(false);
+            }
+        }
+
+        function player1Punch() {
+            if (gameMode === 'cpu') {
+                playerPunchCPU();
+            } else {
+                if (!isPlaying || !player1Turn) return;
+                document.getElementById('player1Btn').textContent = '👊 ' + player1Name;
+                setTimeout(() => {
+                    document.getElementById('player1Btn').textContent = '🖱️ ' + player1Name;
+                }, 500);
+                punchOpponent('player', 'enemy');
+                player1Turn = false;
+            }
+        }
+
+        function player2Punch() {
+            if (!isPlaying || player1Turn || gameMode !== 'player') return;
+            document.getElementById('player2Btn').textContent = '👊 ' + player2Name;
+            setTimeout(() => {
+                document.getElementById('player2Btn').textContent = '⌨️ ' + player2Name;
+            }, 500);
+            punchOpponent('enemy', 'player');
+            player1Turn = true;
+        }
+
+        function punchOpponent(attacker, defender) {
+            const attackerEl = document.getElementById(attacker);
+            const defenderEl = document.getElementById(defender);
+            const fighters = document.querySelector('.fighters');
+            
+            attackerEl.classList.add(attacker === 'player' ? 'punch' : 'enemy-punch');
+            defenderEl.classList.add(defender === 'player' ? 'player-hit' : 'hit');
+            
+            const punchEffect = document.createElement('div');
+            punchEffect.className = 'punch-effect';
+            punchEffect.textContent = '💥';
+            punchEffect.style.left = attacker === 'player' ? '60%' : '35%';
+            punchEffect.style.top = '40%';
+            fighters.appendChild(punchEffect);
+            
+            setTimeout(() => punchEffect.remove(), 600);
+            
+            const damage = Math.floor(Math.random() * 15) + 10;
+            
+            if (defender === 'enemy') {
+                enemyHealth = Math.max(0, enemyHealth - damage);
+            } else {
+                playerHealth = Math.max(0, playerHealth - damage);
+            }
+            
+            setTimeout(() => {
+                attackerEl.classList.remove('punch', 'enemy-punch');
+                defenderEl.classList.remove('hit', 'player-hit');
+            }, 500);
+            
+            updateHealthBars();
+            
+            if (enemyHealth <= 0) {
+                endGame(true);
+            } else if (playerHealth <= 0) {
+                endGame(false);
+            }
+        }
+
+        function playerPunchCPU() {
+            if (!isPlaying || !canPunch) return;
+            
+            canPunch = false;
+            punchOpponent('player', 'enemy');
+            
+            if (enemyHealth > 0) {
+                setTimeout(() => {
+                    if (isPlaying) {
+                        punchOpponent('enemy', 'player');
+                        canPunch = true;
+                    }
+                }, 1000);
+            }
+        }
+
+        function updateHealthBars() {
+            const playerBar = document.getElementById('playerHealth');
+            const enemyBar = document.getElementById('enemyHealth');
+            const playerText = document.getElementById('playerHealthText');
+            const enemyText = document.getElementById('enemyHealthText');
+            
+            playerBar.style.width = (playerHealth / 2) + '%';
+            enemyBar.style.width = (enemyHealth / 2) + '%';
+            playerText.textContent = playerHealth;
+            enemyText.textContent = enemyHealth;
+            
+            if (playerHealth < 60) {
+                playerBar.classList.add('low');
+                playerText.classList.add('low');
+            }
+            if (enemyHealth < 60) {
+                enemyBar.classList.add('low');
+                enemyText.classList.add('low');
+            }
+        }
+
+        function endGame(won) {
+            isPlaying = false;
+            canPunch = false;
+            
+            if (gameMode === 'player') {
+                document.removeEventListener('keydown', handleKeyPress);
+            }
+            
+            const msg = document.getElementById('message');
+            if (gameMode === 'player') {
+                msg.textContent = won ? '🏆 JOGADOR 1 VENCEU!' : '🏆 JOGADOR 2 VENCEU!';
+            } else {
+                msg.textContent = won ? '🏆 VOCÊ VENCEU!' : '💀 VOCÊ PERDEU!';
+            }
+            msg.className = 'message win';
+            
+            setTimeout(() => {
+                document.getElementById('selection').style.display = 'block';
+                document.getElementById('arena').classList.remove('active');
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('startBtn').style.display = 'block';
+                document.getElementById('player2Btn').style.display = 'none';
+                document.getElementById('controlsInfo').style.display = 'none';
+                document.getElementById('player1Btn').textContent = '🖱️ JOGADOR 1';
+                document.getElementById('characterSelection').style.display = 'none';
+                document.getElementById('confirmBtn').style.display = 'none';
+                document.getElementById('player1NameInput').style.display = 'none';
+                document.getElementById('player2NameInput').style.display = 'none';
+                document.getElementById('player1NameInput').value = '';
+                document.getElementById('player2NameInput').value = '';
+                document.querySelectorAll('.character-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                gameMode = null;
+                player1Character = null;
+                player2Character = null;
+                player1Name = '';
+                player2Name = '';
+                document.getElementById('playerHealth').classList.remove('low');
+                document.getElementById('enemyHealth').classList.remove('low');
+                document.getElementById('playerHealthText').classList.remove('low');
+                document.getElementById('enemyHealthText').classList.remove('low');
+                document.getElementById('playerHealthText').textContent = '200';
+                document.getElementById('enemyHealthText').textContent = '200';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

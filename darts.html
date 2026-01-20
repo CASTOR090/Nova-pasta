@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Dardos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 30px;
+            color: #ffd700;
+        }
+        .nav-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .board-container {
+            position: relative;
+            margin: 30px auto;
+        }
+        .board {
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            position: relative;
+            margin: 0 auto;
+            cursor: crosshair;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .ring1 { width: 400px; height: 400px; background: #000; }
+        .ring2 { width: 350px; height: 350px; background: #fff; }
+        .ring3 { width: 250px; height: 250px; background: #e74c3c; }
+        .ring4 { width: 150px; height: 150px; background: #fff; }
+        .ring5 { width: 80px; height: 80px; background: #e74c3c; }
+        .bullseye { width: 30px; height: 30px; background: #ffd700; }
+        .dart {
+            position: absolute;
+            font-size: 2em;
+            transform: translate(-50%, -50%);
+            animation: dartHit 0.3s ease-out;
+        }
+        @keyframes dartHit {
+            0% { transform: translate(-50%, -200%) scale(0.5); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        .controls {
+            margin: 30px 0;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        input {
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 8px;
+            width: 150px;
+            text-align: center;
+        }
+        button {
+            padding: 15px 40px;
+            font-size: 1.3em;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        button:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 30px;
+            border-radius: 10px;
+        }
+        .stat-label {
+            font-size: 1em;
+            opacity: 0.8;
+        }
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 1.8em;
+            min-height: 40px;
+            font-weight: bold;
+        }
+        .win { color: #00ff88; }
+        .lose { color: #ff4444; }
+        .throws {
+            font-size: 1.5em;
+            margin: 20px 0;
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <button class="nav-btn" onclick="window.location.href='home.html'">🏠 HOME</button>
+
+    <div class="container">
+        <h1>🎯 JOGO DE DARDOS</h1>
+        
+        <div class="throws" id="throws">Arremessos: 3/3</div>
+
+        <div class="board-container">
+            <div class="board" id="board" onclick="throwDart(event)">
+                <div class="ring ring1"></div>
+                <div class="ring ring2"></div>
+                <div class="ring ring3"></div>
+                <div class="ring ring4"></div>
+                <div class="ring ring5"></div>
+                <div class="ring bullseye"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="number" id="betAmount" value="10" min="1" placeholder="Aposta">
+            <button id="startBtn" onclick="startGame()">INICIAR</button>
+            <button id="resetBtn" onclick="resetBoard()" disabled>LIMPAR</button>
+        </div>
+
+        <div class="message" id="message">Clique em INICIAR para jogar!</div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">Saldo</div>
+                <div class="stat-value" id="balance">R$ 1000</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Pontuação</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Último Ganho</div>
+                <div class="stat-value" id="lastWin">R$ 0</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let balance = 1000;
+        let throwsLeft = 0;
+        let totalScore = 0;
+        let currentBet = 0;
+        let isPlaying = false;
+
+        function startGame() {
+            const bet = parseFloat(document.getElementById('betAmount').value);
+            if (bet <= 0 || bet > balance) {
+                showMessage('Aposta inválida!', 'lose');
+                return;
+            }
+
+            balance -= bet;
+            currentBet = bet;
+            throwsLeft = 3;
+            totalScore = 0;
+            isPlaying = true;
+
+            updateBalance();
+            updateThrows();
+            updateScore();
+            resetBoard();
+
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('resetBtn').disabled = false;
+            document.getElementById('betAmount').disabled = true;
+            document.getElementById('board').style.cursor = 'crosshair';
+            showMessage('Mire e clique no alvo!', '');
+        }
+
+        function throwDart(event) {
+            if (!isPlaying || throwsLeft <= 0) return;
+
+            const board = document.getElementById('board');
+            const rect = board.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+
+            let points = 0;
+            if (distance <= 15) {
+                points = 100; // Bullseye
+            } else if (distance <= 40) {
+                points = 50; // Centro vermelho
+            } else if (distance <= 75) {
+                points = 25; // Branco
+            } else if (distance <= 125) {
+                points = 15; // Vermelho
+            } else if (distance <= 175) {
+                points = 5; // Branco externo
+            }
+
+            // Adicionar dardo visual
+            const dart = document.createElement('div');
+            dart.className = 'dart';
+            dart.textContent = '🎯';
+            dart.style.left = x + 'px';
+            dart.style.top = y + 'px';
+            board.appendChild(dart);
+
+            totalScore += points;
+            throwsLeft--;
+
+            updateScore();
+            updateThrows();
+
+            if (points >= 50) {
+                showMessage(`🎯 ${points} PONTOS!`, 'win');
+            } else if (points > 0) {
+                showMessage(`${points} pontos`, '');
+            } else {
+                showMessage('Errou!', 'lose');
+            }
+
+            if (throwsLeft === 0) {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            isPlaying = false;
+            document.getElementById('board').style.cursor = 'default';
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('betAmount').disabled = false;
+
+            let winAmount = 0;
+            let message = '';
+
+            if (totalScore >= 200) {
+                winAmount = currentBet * 10;
+                message = `🏆 PERFEITO! ${totalScore} pontos! Ganhou R$ ${winAmount.toFixed(2)}`;
+            } else if (totalScore >= 150) {
+                winAmount = currentBet * 5;
+                message = `⭐ EXCELENTE! ${totalScore} pontos! Ganhou R$ ${winAmount.toFixed(2)}`;
+            } else if (totalScore >= 100) {
+                winAmount = currentBet * 3;
+                message = `👍 BOM! ${totalScore} pontos! Ganhou R$ ${winAmount.toFixed(2)}`;
+            } else if (totalScore >= 50) {
+                winAmount = currentBet * 1.5;
+                message = `😊 ${totalScore} pontos! Ganhou R$ ${winAmount.toFixed(2)}`;
+            } else {
+                message = `😢 Apenas ${totalScore} pontos. Perdeu!`;
+            }
+
+            if (winAmount > 0) {
+                balance += winAmount;
+                showMessage(message, 'win');
+            } else {
+                showMessage(message, 'lose');
+            }
+
+            document.getElementById('lastWin').textContent = `R$ ${winAmount.toFixed(2)}`;
+            updateBalance();
+        }
+
+        function resetBoard() {
+            const darts = document.querySelectorAll('.dart');
+            darts.forEach(dart => dart.remove());
+        }
+
+        function updateBalance() {
+            document.getElementById('balance').textContent = `R$ ${balance.toFixed(2)}`;
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = totalScore;
+        }
+
+        function updateThrows() {
+            document.getElementById('throws').textContent = `Arremessos: ${throwsLeft}/3`;
+        }
+
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo Mines</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        .nav-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: transform 0.2s;
+        }
+        .nav-btn:hover {
+            transform: scale(1.05);
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+        }
+        .tile {
+            aspect-ratio: 1;
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 2em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        .tile:hover:not(.revealed) {
+            transform: scale(1.05);
+            background: linear-gradient(145deg, #34495e, #3d566e);
+        }
+        .tile.revealed {
+            cursor: not-allowed;
+        }
+        .tile.diamond {
+            background: linear-gradient(145deg, #00ff88, #00cc6a);
+            animation: pulse 0.5s;
+        }
+        .tile.mine {
+            background: linear-gradient(145deg, #ff4444, #cc0000);
+            animation: explode 0.5s;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        @keyframes explode {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        input, select {
+            padding: 12px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            width: 120px;
+            text-align: center;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        button:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-start {
+            background: #00ff88;
+            color: #000;
+        }
+        .btn-cashout {
+            background: #ffd700;
+            color: #000;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .multiplier-display {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00ff88;
+            margin: 10px 0;
+        }
+        .message {
+            margin-top: 15px;
+            font-size: 1.2em;
+            min-height: 30px;
+            font-weight: bold;
+        }
+        .win {
+            color: #00ff88;
+        }
+        .lose {
+            color: #ff4444;
+        }
+    </style>
+</head>
+<body>
+    <button class="nav-btn" onclick="window.location.href='home.html'">🏠 HOME</button>
+    <div class="container">
+        <h1>💎 MINES</h1>
+        
+        <div class="multiplier-display" id="multiplier">1.00x</div>
+        
+        <div class="board" id="board"></div>
+
+        <div class="controls">
+            <input type="number" id="betAmount" value="10" min="1" placeholder="Aposta">
+            <select id="minesCount">
+                <option value="1">1 Mina</option>
+                <option value="3" selected>3 Minas</option>
+                <option value="5">5 Minas</option>
+                <option value="7">7 Minas</option>
+            </select>
+            <button class="btn-start" id="startBtn" onclick="startGame()">INICIAR</button>
+            <button class="btn-cashout" id="cashoutBtn" onclick="cashout()" disabled>SACAR</button>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="stats">
+            <div class="stat">
+                <span class="stat-label">Saldo</span>
+                <span class="stat-value" id="balance">R$ 0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Última Aposta</span>
+                <span class="stat-value" id="lastBet">R$ 0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Último Ganho</span>
+                <span class="stat-value" id="lastWin">R$ 0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api/mines';
+        let isPlaying = false;
+
+        function createBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            for (let i = 0; i < 25; i++) {
+                const tile = document.createElement('button');
+                tile.className = 'tile';
+                tile.onclick = () => revealTile(i);
+                tile.id = `tile-${i}`;
+                board.appendChild(tile);
+            }
+        }
+
+        async function checkServer() {
+            try {
+                const response = await fetch(`${API_URL}/status`);
+                const data = await response.json();
+                updateBalance(data.balance);
+                return true;
+            } catch (error) {
+                showMessage('Servidor Offline!', 'lose');
+                return false;
+            }
+        }
+
+        async function startGame() {
+            const betAmount = parseFloat(document.getElementById('betAmount').value);
+            const minesCount = parseInt(document.getElementById('minesCount').value);
+            
+            try {
+                const response = await fetch(`${API_URL}/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bet: betAmount, mines: minesCount })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    showMessage('Aposta inválida!', 'lose');
+                    return;
+                }
+
+                isPlaying = true;
+                createBoard();
+                
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('cashoutBtn').disabled = false;
+                document.getElementById('betAmount').disabled = true;
+                document.getElementById('minesCount').disabled = true;
+                document.getElementById('message').textContent = '';
+                document.getElementById('lastBet').textContent = `R$ ${betAmount.toFixed(2)}`;
+                document.getElementById('multiplier').textContent = '1.00x';
+                
+                updateBalance(data.balance);
+            } catch (error) {
+                showMessage('Erro ao conectar com servidor!', 'lose');
+            }
+        }
+
+        async function revealTile(position) {
+            if (!isPlaying) return;
+            
+            const tile = document.getElementById(`tile-${position}`);
+            if (tile.classList.contains('revealed')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/reveal`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ position })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.valid) return;
+                
+                tile.classList.add('revealed');
+                
+                if (data.isMine) {
+                    tile.classList.add('mine');
+                    tile.textContent = '💣';
+                    showMessage('BOOM! Você perdeu!', 'lose');
+                    document.getElementById('lastWin').textContent = 'R$ 0.00';
+                    revealAllMines(data.board);
+                    endGame();
+                } else {
+                    tile.classList.add('diamond');
+                    tile.textContent = '💎';
+                    document.getElementById('multiplier').textContent = `${data.multiplier.toFixed(2)}x`;
+                }
+            } catch (error) {
+                showMessage('Erro ao revelar!', 'lose');
+            }
+        }
+
+        async function cashout() {
+            if (!isPlaying) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/cashout`, { method: 'POST' });
+                const data = await response.json();
+                
+                document.getElementById('lastWin').textContent = `R$ ${data.winAmount.toFixed(2)}`;
+                showMessage(`Você ganhou R$ ${data.winAmount.toFixed(2)}!`, 'win');
+                updateBalance(data.balance);
+                
+                revealAllMines(data.board);
+                endGame();
+            } catch (error) {
+                showMessage('Erro ao sacar!', 'lose');
+            }
+        }
+
+        function revealAllMines(board) {
+            for (let i = 0; i < 25; i++) {
+                const tile = document.getElementById(`tile-${i}`);
+                if (board[i] === 1 && !tile.classList.contains('revealed')) {
+                    tile.classList.add('revealed', 'mine');
+                    tile.textContent = '💣';
+                }
+            }
+        }
+
+        function endGame() {
+            isPlaying = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('cashoutBtn').disabled = true;
+            document.getElementById('betAmount').disabled = false;
+            document.getElementById('minesCount').disabled = false;
+        }
+
+        function updateBalance(balance) {
+            document.getElementById('balance').textContent = `R$ ${balance.toFixed(2)}`;
+        }
+
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+        }
+
+        createBoard();
+        checkServer();
+    </script>
+</body>
+</html>

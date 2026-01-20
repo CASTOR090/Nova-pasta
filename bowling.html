@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Boliche</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #8e44ad 0%, #3498db 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+            max-width: 800px;
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 30px;
+            color: #ffd700;
+        }
+        .nav-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .lane {
+            background: linear-gradient(to top, 
+                #2c1810 0%, 
+                #3d2415 10%,
+                #4a2c1a 20%,
+                #5c3520 40%,
+                #6d4028 60%,
+                #7d4a30 80%,
+                #8d5438 100%);
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            height: 650px;
+            border: 8px solid #1a0f08;
+            overflow: hidden;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+        }
+        .lane::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(to right,
+                transparent 0%,
+                rgba(139, 90, 43, 0.3) 20%,
+                rgba(160, 110, 60, 0.4) 50%,
+                rgba(139, 90, 43, 0.3) 80%,
+                transparent 100%);
+            pointer-events: none;
+        }
+        .lane-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+        .lane-line {
+            position: absolute;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to top,
+                rgba(0, 0, 0, 0.8) 0%,
+                rgba(0, 0, 0, 0.6) 50%,
+                rgba(0, 0, 0, 0.4) 100%);
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        .lane-line.left { left: 20%; }
+        .lane-line.right { right: 20%; }
+        .lane-dots {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+        .dot-row {
+            position: absolute;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 50%;
+        }
+        .foul-line {
+            position: absolute;
+            bottom: 80px;
+            left: 20%;
+            right: 20%;
+            height: 4px;
+            background: #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+        .pins {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            padding: 20px;
+            border-radius: 50%;
+        }
+        .pin-row {
+            display: flex;
+            gap: 15px;
+        }
+        .pin {
+            width: 35px;
+            height: 70px;
+            background-image: url('pp-removebg-previeww.png');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            transition: all 0.3s;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.6));
+        }
+        .pin::before {
+            display: none;
+        }
+        .pin::after {
+            display: none;
+        }
+        .pin.fallen {
+            opacity: 0.4;
+            transform: rotate(90deg) translateX(20px);
+        }
+        .ball-area {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+        }
+        .throw-btn {
+            padding: 20px 40px;
+            font-size: 1.5em;
+            background: linear-gradient(145deg, #ff6b6b, #ee5a6f);
+            color: white;
+            border: 3px solid #ffd700;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .throw-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+        }
+        .throw-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .ball {
+            position: absolute;
+            font-size: 3.5em;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.8));
+        }
+        .ball.rolling {
+            animation: rollBall 2s ease-in forwards;
+        }
+        @keyframes rollBall {
+            0% { 
+                bottom: 50px; 
+                font-size: 3.5em;
+                transform: translateX(-50%) rotate(0deg);
+                filter: drop-shadow(0 8px 15px rgba(0,0,0,0.8));
+            }
+            50% {
+                font-size: 2.2em;
+                filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6));
+            }
+            100% { 
+                bottom: 560px; 
+                font-size: 1.2em;
+                transform: translateX(-50%) rotate(1080deg);
+                filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4));
+            }
+        }
+        .controls {
+            margin: 30px 0;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        input {
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 8px;
+            width: 150px;
+            text-align: center;
+        }
+        button {
+            padding: 15px 40px;
+            font-size: 1.3em;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        button:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 30px;
+            border-radius: 10px;
+        }
+        .stat-label {
+            font-size: 1em;
+            opacity: 0.8;
+        }
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 1.8em;
+            min-height: 40px;
+            font-weight: bold;
+        }
+        .win { color: #00ff88; }
+        .lose { color: #ff4444; }
+        .info {
+            font-size: 1.3em;
+            margin: 20px 0;
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <button class="nav-btn" onclick="window.location.href='home.html'">🏠 HOME</button>
+
+    <div class="container">
+        <h1>🎳 JOGO DE BOLICHE</h1>
+        
+        <div class="info" id="info">Clique em INICIAR para jogar!</div>
+
+        <div class="lane" id="lane">
+            <div class="lane-lines">
+                <div class="lane-line left"></div>
+                <div class="lane-line right"></div>
+            </div>
+            
+            <div class="lane-dots">
+                <div class="dot-row" style="top: 30%;">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <div class="dot-row" style="top: 50%;">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <div class="dot-row" style="top: 70%;">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+            
+            <div class="foul-line"></div>
+            
+            <div class="pins" id="pins">
+                <div class="pin-row">
+                    <div class="pin" id="pin0"></div>
+                </div>
+                <div class="pin-row">
+                    <div class="pin" id="pin1"></div>
+                    <div class="pin" id="pin2"></div>
+                </div>
+                <div class="pin-row">
+                    <div class="pin" id="pin3"></div>
+                    <div class="pin" id="pin4"></div>
+                    <div class="pin" id="pin5"></div>
+                </div>
+                <div class="pin-row">
+                    <div class="pin" id="pin6"></div>
+                    <div class="pin" id="pin7"></div>
+                    <div class="pin" id="pin8"></div>
+                    <div class="pin" id="pin9"></div>
+                </div>
+            </div>
+
+            <div class="ball-area" id="ballArea">
+                <button class="throw-btn" onclick="throwBall('left')" id="btnLeft">⬅️ ESQUERDA</button>
+                <button class="throw-btn" onclick="throwBall('center')" id="btnCenter">🎯 CENTRO</button>
+                <button class="throw-btn" onclick="throwBall('right')" id="btnRight">➡️ DIREITA</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="number" id="betAmount" value="10" min="1" placeholder="Aposta">
+            <button id="startBtn" onclick="startGame()">INICIAR</button>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">Saldo</div>
+                <div class="stat-value" id="balance">R$ 1000</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Pinos Derrubados</div>
+                <div class="stat-value" id="pinsDown">0/10</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Último Ganho</div>
+                <div class="stat-value" id="lastWin">R$ 0</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let balance = 1000;
+        let currentBet = 0;
+        let isPlaying = false;
+        let pinsKnocked = 0;
+        let throwsLeft = 2;
+
+        function startGame() {
+            const bet = parseFloat(document.getElementById('betAmount').value);
+            if (bet <= 0 || bet > balance) {
+                showMessage('Aposta inválida!', 'lose');
+                return;
+            }
+
+            balance -= bet;
+            currentBet = bet;
+            isPlaying = true;
+            pinsKnocked = 0;
+            throwsLeft = 2;
+
+            updateBalance();
+            resetPins();
+            updatePinsDown();
+
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('betAmount').disabled = true;
+            const buttons = document.querySelectorAll('.throw-btn');
+            buttons.forEach(btn => btn.disabled = false);
+            document.getElementById('info').textContent = `Arremessos restantes: ${throwsLeft}`;
+            showMessage('Escolha a direção e arremesse!', '');
+        }
+
+        function throwBall(direction) {
+            if (!isPlaying || throwsLeft <= 0) return;
+
+            const buttons = document.querySelectorAll('.throw-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            const ball = document.createElement('div');
+            ball.className = 'ball rolling';
+            ball.textContent = '🎱';
+            
+            if (direction === 'left') {
+                ball.style.left = '35%';
+            } else if (direction === 'right') {
+                ball.style.left = '65%';
+            }
+
+            document.getElementById('lane').appendChild(ball);
+
+            setTimeout(() => {
+                ball.remove();
+                knockPins(direction);
+                throwsLeft--;
+
+                if (throwsLeft > 0 && pinsKnocked < 10) {
+                    buttons.forEach(btn => btn.disabled = false);
+                    document.getElementById('info').textContent = `Arremessos restantes: ${throwsLeft}`;
+                } else {
+                    endGame();
+                }
+            }, 2000);
+        }
+
+        function knockPins(direction) {
+            let pinsToKnock = [];
+
+            if (direction === 'center') {
+                // Centro: melhor chance
+                const knockCount = Math.floor(Math.random() * 4) + 5; // 5-8 pinos
+                pinsToKnock = getRandomPins(knockCount);
+            } else if (direction === 'left') {
+                // Esquerda: chance média
+                const knockCount = Math.floor(Math.random() * 4) + 3; // 3-6 pinos
+                pinsToKnock = getRandomPins(knockCount);
+            } else {
+                // Direita: chance média
+                const knockCount = Math.floor(Math.random() * 4) + 3; // 3-6 pinos
+                pinsToKnock = getRandomPins(knockCount);
+            }
+
+            pinsToKnock.forEach(pinId => {
+                const pin = document.getElementById(`pin${pinId}`);
+                if (pin && !pin.classList.contains('fallen')) {
+                    pin.classList.add('fallen');
+                    pinsKnocked++;
+                }
+            });
+
+            updatePinsDown();
+        }
+
+        function getRandomPins(count) {
+            const availablePins = [];
+            for (let i = 0; i < 10; i++) {
+                const pin = document.getElementById(`pin${i}`);
+                if (!pin.classList.contains('fallen')) {
+                    availablePins.push(i);
+                }
+            }
+
+            const selected = [];
+            for (let i = 0; i < Math.min(count, availablePins.length); i++) {
+                const randomIndex = Math.floor(Math.random() * availablePins.length);
+                selected.push(availablePins[randomIndex]);
+                availablePins.splice(randomIndex, 1);
+            }
+
+            return selected;
+        }
+
+        function endGame() {
+            isPlaying = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('betAmount').disabled = false;
+            const buttons = document.querySelectorAll('.throw-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            let winAmount = 0;
+            let message = '';
+
+            if (pinsKnocked === 10) {
+                winAmount = currentBet * 10;
+                message = `🏆 STRIKE! Todos os pinos! Ganhou R$ ${winAmount.toFixed(2)}`;
+            } else if (pinsKnocked >= 8) {
+                winAmount = currentBet * 5;
+                message = `⭐ EXCELENTE! ${pinsKnocked} pinos! Ganhou R$ ${winAmount.toFixed(2)}`;
+            } else if (pinsKnocked >= 6) {
+                winAmount = currentBet * 3;
+                message = `👍 BOM! ${pinsKnocked} pinos! Ganhou R$ ${winAmount.toFixed(2)}`;
+            } else if (pinsKnocked >= 4) {
+                winAmount = currentBet * 1.5;
+                message = `😊 ${pinsKnocked} pinos! Ganhou R$ ${winAmount.toFixed(2)}`;
+            } else {
+                message = `😢 Apenas ${pinsKnocked} pinos. Perdeu!`;
+            }
+
+            if (winAmount > 0) {
+                balance += winAmount;
+                showMessage(message, 'win');
+            } else {
+                showMessage(message, 'lose');
+            }
+
+            document.getElementById('lastWin').textContent = `R$ ${winAmount.toFixed(2)}`;
+            document.getElementById('info').textContent = 'Clique em INICIAR para jogar novamente!';
+            updateBalance();
+        }
+
+        function resetPins() {
+            for (let i = 0; i < 10; i++) {
+                const pin = document.getElementById(`pin${i}`);
+                pin.classList.remove('fallen');
+            }
+        }
+
+        function updateBalance() {
+            document.getElementById('balance').textContent = `R$ ${balance.toFixed(2)}`;
+        }
+
+        function updatePinsDown() {
+            document.getElementById('pinsDown').textContent = `${pinsKnocked}/10`;
+        }
+
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+        }
+
+        const buttons = document.querySelectorAll('.throw-btn');
+        buttons.forEach(btn => btn.disabled = true);
+    </script>
+</body>
+</html>
