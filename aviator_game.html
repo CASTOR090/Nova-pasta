@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+        .nav-btn {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            padding: 15px 30px;
+            background: linear-gradient(145deg, #00d4ff, #0099cc);
+            color: #000;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2em;
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 0 8px 20px rgba(0, 212, 255, 0.4);
+        }
+        .nav-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 30px rgba(0, 212, 255, 0.6);
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.95);
+            padding: 35px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 212, 255, 0.3);
+            max-width: 900px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            font-size: 3.2em;
+            margin-bottom: 25px;
+            background: linear-gradient(45deg, #00d4ff, #0099cc, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            font-weight: 700;
+        }
+        .game-screen {
+            background: linear-gradient(to bottom, #87CEEB 0%, #4682B4 40%, #228B22 70%, #333 100%);
+            height: 450px;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            margin: 25px 0;
+            border: 2px solid #00d4ff;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), inset 0 0 50px rgba(0, 212, 255, 0.1);
+        }
+        .runway {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(to right, #2a2a2a 0%, #404040 50%, #2a2a2a 100%);
+            border-top: 4px solid #fff;
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .runway::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: repeating-linear-gradient(to right, #fff 0px, #fff 25px, transparent 25px, transparent 50px);
+            transform: translateY(-50%);
+            opacity: 0.9;
+        }
+     
+      
+        .control-tower {
+            position: absolute;
+            bottom: 80px;
+            right: 120px;
+            font-size: 2em;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+        }
+        .trajectory {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .trail {
+            position: absolute;
+            height: 3px;
+            border-top: 3px dashed #00d4ff;
+            opacity: 0.8;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+            transform-origin: 0 50%;
+        }
+        .clouds {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            z-index: 2;
+        }
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50px;
+            opacity: 0.6;
+            animation: moveClouds 20s linear infinite;
+        }
+        @keyframes moveClouds {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(100vw + 100px)); }
+        }
+        .buildings {
+            position: absolute;
+            bottom: 80px;
+            left: 0;
+            width: 100%;
+            height: 120px;
+            z-index: 0;
+        }
+        .building {
+            position: absolute;
+            bottom: 0;
+            background: linear-gradient(to top, #2c3e50, #34495e);
+            border-radius: 2px 2px 0 0;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        .building::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 20%;
+            width: 60%;
+            height: 80%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent 0px,
+                transparent 8px,
+                rgba(255,255,0,0.3) 8px,
+                rgba(255,255,0,0.3) 12px
+            );
+        }
+        .plane {
+            position: absolute;
+            font-size: 3.5em;
+            left: 20px;
+            bottom: 80px;
+            transition: all 0.1s ease;
+            z-index: 10;
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6));
+        }
+        .multiplier-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4.5em;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(0, 255, 136, 0.6);
+            z-index: 5;
+        }
+        .crashed {
+            color: #ff4444 !important;
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translate(-50%, -50%); }
+            25% { transform: translate(-48%, -52%); }
+            75% { transform: translate(-52%, -48%); }
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        input {
+            padding: 18px 20px;
+            font-size: 1.3em;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 15px;
+            width: 180px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+        button {
+            padding: 18px 35px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-bet {
+            background: linear-gradient(145deg, #00ff88, #00cc6a);
+            color: #000;
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.4);
+        }
+        .btn-cashout {
+            background: linear-gradient(145deg, #ffd700, #ffed4e);
+            color: #000;
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .stat {
+            background: rgba(0, 212, 255, 0.08);
+            padding: 20px 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            min-width: 140px;
+            backdrop-filter: blur(5px);
+        }
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .stat-value {
+            font-size: 1.6em;
+            font-weight: 700;
+            margin-top: 8px;
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .message {
+            margin-top: 15px;
+            font-size: 1.3em;
+            min-height: 40px;
+            font-weight: bold;
+        }
+        .win { color: #00ff88; }
+        .lose { color: #ff4444; }
+    </style>
+</head>
+<body>
+    <button class="nav-btn" onclick="window.location.href='home.html'">🏠 HOME</button>
+
+    <div class="container">
+        <h1>✈️ AVIATOR</h1>
+        
+        <div class="game-screen">
+            <div class="clouds">
+                <div class="cloud" style="left: -100px; top: 10px; width: 50px; height: 25px;"></div>
+                <div class="cloud" style="left: -250px; top: 5px; width: 60px; height: 30px;"></div>
+                <div class="cloud" style="left: -400px; top: 15px; width: 55px; height: 28px;"></div>
+                <div class="cloud" style="left: -550px; top: 8px; width: 65px; height: 32px;"></div>
+                <div class="cloud" style="left: -700px; top: 12px; width: 58px; height: 29px;"></div>
+                <div class="cloud" style="left: -150px; top: 35px; width: 45px; height: 22px;"></div>
+                <div class="cloud" style="left: -320px; top: 40px; width: 52px; height: 26px;"></div>
+                <div class="cloud" style="left: -480px; top: 38px; width: 48px; height: 24px;"></div>
+                <div class="cloud" style="left: -620px; top: 42px; width: 55px; height: 28px;"></div>
+                <div class="cloud" style="left: 50px; top: 18px; width: 42px; height: 21px;"></div>
+                <div class="cloud" style="left: 200px; top: 25px; width: 48px; height: 24px;"></div>
+                <div class="cloud" style="left: 350px; top: 12px; width: 53px; height: 27px;"></div>
+                <div class="cloud" style="left: 500px; top: 30px; width: 46px; height: 23px;"></div>
+                <div class="cloud" style="left: 650px; top: 20px; width: 51px; height: 26px;"></div>
+                <div class="cloud" style="left: 800px; top: 15px; width: 49px; height: 25px;"></div>
+                <div class="cloud" style="left: 120px; top: 45px; width: 44px; height: 22px;"></div>
+                <div class="cloud" style="left: 280px; top: 48px; width: 47px; height: 24px;"></div>
+                <div class="cloud" style="left: 430px; top: 50px; width: 43px; height: 22px;"></div>
+                <div class="cloud" style="left: 580px; top: 46px; width: 50px; height: 25px;"></div>
+                <div class="cloud" style="left: 730px; top: 44px; width: 45px; height: 23px;"></div>
+            </div>
+            <div class="buildings">
+                <div class="building" style="left: 20px; width: 35px; height: 55px;"></div>
+                <div class="building" style="left: 60px; width: 40px; height: 80px;"></div>
+                <div class="building" style="left: 105px; width: 32px; height: 65px;"></div>
+                <div class="building" style="left: 142px; width: 45px; height: 90px;"></div>
+                <div class="building" style="left: 192px; width: 28px; height: 50px;"></div>
+                <div class="building" style="left: 225px; width: 38px; height: 75px;"></div>
+                <div class="building" style="left: 268px; width: 50px; height: 100px;"></div>
+                <div class="building" style="left: 323px; width: 33px; height: 60px;"></div>
+                <div class="building" style="left: 361px; width: 42px; height: 85px;"></div>
+                <div class="building" style="left: 408px; width: 36px; height: 70px;"></div>
+                <div class="building" style="left: 449px; width: 44px; height: 95px;"></div>
+                <div class="building" style="left: 498px; width: 30px; height: 58px;"></div>
+                <div class="building" style="left: 533px; width: 39px; height: 78px;"></div>
+                <div class="building" style="left: 577px; width: 47px; height: 88px;"></div>
+                <div class="building" style="left: 629px; width: 34px; height: 63px;"></div>
+                <div class="building" style="left: 668px; width: 41px; height: 82px;"></div>
+                <div class="building" style="left: 714px; width: 37px; height: 72px;"></div>
+                <div class="building" style="left: 756px; width: 43px; height: 87px;"></div>
+                <div class="building" style="left: 804px; width: 35px; height: 67px;"></div>
+                <div class="building" style="left: 844px; width: 40px; height: 79px;"></div>
+            </div>
+            <div class="runway"></div>
+            
+            
+            <div class="plane" id="plane">✈️</div>
+            <div class="trajectory" id="trajectory"></div>
+            <div class="multiplier-display" id="multiplier">1.00x</div>
+        </div>
+
+        <div class="controls">
+            <input type="number" id="betAmount" value="10" min="1" placeholder="Valor da Aposta">
+            <button class="btn-bet" id="betBtn" onclick="startFlight()">Apostar</button>
+            <button class="btn-cashout" id="cashoutBtn" onclick="cashOut()" disabled>Sacar</button>
+        </div>
+
+        <div class="message" id="message">Faça sua aposta para decolar!</div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">Saldo</div>
+                <div class="stat-value" id="balance">R$ 1000</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Aposta</div>
+                <div class="stat-value" id="currentBet">R$ 0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Ganho</div>
+                <div class="stat-value" id="winAmount">R$ 0</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let balance = 1000;
+        let currentBet = 0;
+        let multiplier = 1.00;
+        let isFlying = false;
+        let hasTakenOff = false;
+        let crashPoint = 0;
+        let gameInterval;
+        
+        function updateDisplay() {
+            document.getElementById('balance').textContent = `R$ ${balance.toFixed(2)}`;
+            document.getElementById('multiplier').textContent = `${multiplier.toFixed(2)}x`;
+        }
+
+        function startFlight() {
+            const betValue = parseFloat(document.getElementById('betAmount').value);
+            
+            if (betValue <= 0 || betValue > balance) {
+                showMessage('Aposta inválida!', 'lose');
+                return;
+            }
+
+            balance -= betValue;
+            currentBet = betValue;
+            multiplier = 1.00;
+            isFlying = true;
+            hasTakenOff = false;
+            
+            // Definir ponto de crash (55% baixo, 45% alto)
+            const random = Math.random();
+            if (random < 0.55) {
+                crashPoint = 1.1 + Math.random() * 0.7; // 1.1x - 1.8x
+            } else {
+                crashPoint = 1.8 + Math.random() * 1.2; // 1.8x - 3.0x
+            }
+            
+            document.getElementById('betBtn').disabled = true;
+            document.getElementById('cashoutBtn').disabled = false;
+            document.getElementById('betAmount').disabled = true;
+            document.getElementById('currentBet').textContent = `R$ ${betValue.toFixed(2)}`;
+            document.getElementById('message').textContent = 'Acelerando na pista...';
+            
+            updateDisplay();
+            flyPlane();
+            
+            gameInterval = setInterval(() => {
+                // Só conta multiplicador após decolar
+                if (hasTakenOff) {
+                    multiplier += 0.01;
+                    
+                    if (multiplier >= crashPoint) {
+                        crash();
+                    }
+                }
+                
+                updateDisplay();
+            }, 50);
+        }
+
+        function flyPlane() {
+            const plane = document.getElementById('plane');
+            const trajectory = document.getElementById('trajectory');
+            let position = 20;
+            let height = 80;
+            let pathPoints = [];
+            let takeoffSpeed = 0;
+            
+            const flyInterval = setInterval(() => {
+                if (!isFlying) {
+                    clearInterval(flyInterval);
+                    return;
+                }
+                
+                // Aceleração na pista
+                if (position < 150) {
+                    takeoffSpeed += 0.1;
+                    position += 1 + takeoffSpeed;
+                    height = 80; // Mantém na pista
+                } else {
+                    // Decolagem - marca que decolou
+                    if (!hasTakenOff) {
+                        hasTakenOff = true;
+                        pathPoints = [{x: position, y: height}]; // Inicia pontos só após decolar
+                        document.getElementById('message').textContent = 'VOANDO! Saque quando quiser!';
+                    }
+                    position += 3;
+                    height += 2.5;
+                    
+                    // Só adiciona pontos durante o voo
+                    pathPoints.push({x: position, y: height});
+                }
+                
+                plane.style.left = `${position}px`;
+                plane.style.bottom = `${height}px`;
+                
+                // Desenhar trajetória APENAS durante o voo
+                if (hasTakenOff && pathPoints.length > 1) {
+                    trajectory.innerHTML = '';
+                    for (let i = 0; i < pathPoints.length - 1; i++) {
+                        const current = pathPoints[i];
+                        const next = pathPoints[i + 1];
+                        const length = Math.sqrt(Math.pow(next.x - current.x, 2) + Math.pow(next.y - current.y, 2));
+                        const angle = Math.atan2(next.y - current.y, next.x - current.x) * 180 / Math.PI;
+                        
+                        const segment = document.createElement('div');
+                        segment.style.cssText = `
+                            position: absolute;
+                            left: ${current.x}px;
+                            bottom: ${current.y}px;
+                            width: ${length}px;
+                            height: 3px;
+                            background: #00d4ff;
+                            border-top: 2px dashed #fff;
+                            opacity: 0.8;
+                            transform: rotate(${angle}deg);
+                            transform-origin: 0 50%;
+                        `;
+                        trajectory.appendChild(segment);
+                    }
+                }
+                
+                if (position > 700) {
+                    position = 20;
+                    height = 80;
+                    takeoffSpeed = 0;
+                    hasTakenOff = false;
+                    pathPoints = [];
+                    trajectory.innerHTML = '';
+                }
+            }, 50);
+        }
+
+        function cashOut() {
+            if (!isFlying || !hasTakenOff) return;
+            
+            const winValue = currentBet * multiplier;
+            balance += winValue;
+            
+            document.getElementById('winAmount').textContent = `R$ ${winValue.toFixed(2)}`;
+            showMessage(`Você ganhou R$ ${winValue.toFixed(2)}! (${multiplier.toFixed(2)}x)`, 'win');
+            
+            endGame();
+        }
+
+        function crash() {
+            document.getElementById('multiplier').classList.add('crashed');
+            document.getElementById('plane').textContent = '💥';
+            document.getElementById('winAmount').textContent = 'R$ 0.00';
+            showMessage(`CRASH em ${multiplier.toFixed(2)}x! Perdeu R$ ${currentBet.toFixed(2)}`, 'lose');
+            
+            endGame();
+        }
+
+        function endGame() {
+            isFlying = false;
+            clearInterval(gameInterval);
+            
+            document.getElementById('betBtn').disabled = false;
+            document.getElementById('cashoutBtn').disabled = true;
+            document.getElementById('betAmount').disabled = false;
+            
+            setTimeout(() => {
+                document.getElementById('plane').textContent = '✈️';
+                document.getElementById('plane').style.left = '20px';
+                document.getElementById('plane').style.bottom = '80px';
+                document.getElementById('trajectory').innerHTML = '';
+                document.getElementById('message').textContent = 'Faça sua aposta para decolar!';
+                hasTakenOff = false;
+            }, 3000);
+            
+            updateDisplay();
+        }
+
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+        }
+
+        updateDisplay();
+    </script>
+</body>
+</html>

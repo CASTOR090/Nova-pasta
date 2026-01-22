@@ -1,12 +1,12 @@
-# Jogo Aviator - Python + JavaScript
+# Roleta Europeia - Python + JavaScript
 
 ## Arquitetura
 - **Backend**: Python Flask (servidor HTTP REST API)
 - **Frontend**: HTML + JavaScript (cliente)
 
 ## Arquivos
-- `server.py` - Servidor Flask com lógica do jogo
-- `index.html` - Interface do usuário
+- `server.py` - Servidor Flask com lógica da roleta
+- `index.html` - Interface da roleta
 - `requirements.txt` - Dependências Python
 
 ## Como executar
@@ -23,14 +23,14 @@ python server.py
 
 ## Endpoints da API
 
-- `POST /api/start` - Iniciar jogo
-- `GET /api/update` - Atualizar multiplicador
-- `POST /api/cashout` - Sacar ganhos
-- `GET /api/status` - Status do jogo
+- `POST /api/spin` - Girar a roleta
+- `GET /api/result` - Obter resultado do giro
+- `GET /api/status` - Status da roleta
 
 ## Como jogar
 1. Inicie o servidor Python: `python server.py`
 2. Abra `index.html` no navegador
 3. Digite o valor da aposta
-4. Clique em APOSTAR
-5. Clique em SACAR antes do crash!
+4. Selecione o tipo de aposta (vermelho, preto, verde, par, ímpar, 1-18)
+5. Clique em GIRAR ROLETA
+6. Aguarde o resultado!

@@ -3,452 +3,350 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviator - Java Backend</title>
+    <title>Roleta</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f4c3a, #1a5f4a);
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            color: white;
         }
-        .container {
-            background: rgba(0, 0, 0, 0.7);
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            max-width: 500px;
-            width: 90%;
-        }
-        h1 {
-            margin-bottom: 20px;
-            font-size: 2.5em;
-        }
-        .nav-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background: #ffd700;
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1em;
-            transition: transform 0.2s;
-        }
-        .nav-btn:hover {
-            transform: scale(1.05);
-        }
-        .game-area {
-            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%);
-            padding: 40px;
-            border-radius: 15px;
+
+        .roulette-container {
+            position: relative;
             margin: 20px 0;
+        }
+
+        .roulette-wheel {
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #8B4513 60%, #654321 100%);
+            border: 15px solid #8B4513;
             position: relative;
+            transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        .number-slot {
+            position: absolute;
+            width: 30px;
+            height: 60px;
+            transform-origin: 15px 200px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+            padding-top: 5px;
+        }
+
+        .red { background: #DC143C; }
+        .black { background: #000000; }
+        .green { background: #228B22; }
+
+        .roulette-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #FFD700, #DAA520);
+            border-radius: 50%;
+            border: 5px solid #8B4513;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        .inner-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
             height: 300px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
+            border-radius: 50%;
+            background: #228B22;
+            border: 3px solid #FFD700;
         }
-        .trajectory-line {
+
+        .roulette-pointer {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #FFD700;
+            z-index: 10;
         }
-        .trajectory-line svg {
-            width: 100%;
-            height: 100%;
-        }
-        .city {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 80px;
-            display: flex;
-            justify-content: space-around;
-            align-items: flex-end;
-            transition: transform 0.1s linear;
-        }
-        .building {
-            background: linear-gradient(to right, #555, #777);
-            border-radius: 2px 2px 0 0;
-            position: relative;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.3);
-        }
-        .building::before {
-            content: '';
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            right: 5px;
-            bottom: 5px;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 8px,
-                rgba(255,255,255,0.1) 8px,
-                rgba(255,255,255,0.1) 10px
-            );
-        }
-        .cloud {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 50px;
-            opacity: 0.6;
-            transition: transform 0.1s linear;
-        }
-        .multiplier {
-            font-size: 4em;
-            font-weight: bold;
-            color: #00ff88;
-            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
-            transition: color 0.3s;
-        }
-        .multiplier.crashed {
-            color: #ff4444;
-            text-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
-        }
-        .plane {
-            font-size: 3em;
-            position: absolute;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
-        }
-        .crashed {
-            color: #ff4444;
-        }
+
         .controls {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-            flex-direction: column;
-        }
-        .bet-controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            align-items: center;
-        }
-        input {
-            padding: 12px;
-            font-size: 1.1em;
-            border: none;
-            border-radius: 8px;
-            width: 150px;
-            text-align: center;
-        }
-        button {
-            padding: 15px 30px;
-            font-size: 1.2em;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s;
-        }
-        button:hover {
-            transform: scale(1.05);
-        }
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn-start {
-            background: #00ff88;
-            color: #000;
-        }
-        .btn-cashout {
-            background: #ffd700;
-            color: #000;
-        }
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0,0,0,0.7);
+            padding: 20px;
             border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
         }
-        .stat {
-            display: flex;
-            flex-direction: column;
+
+        .bet-section {
+            margin: 10px 0;
         }
-        .stat-label {
-            font-size: 0.9em;
-            opacity: 0.8;
-        }
-        .stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-        .message {
-            margin-top: 15px;
-            font-size: 1.2em;
-            min-height: 30px;
-            font-weight: bold;
-        }
-        .win {
-            color: #00ff88;
-        }
-        .lose {
-            color: #ff4444;
-        }
-        .server-status {
-            font-size: 0.9em;
-            margin-bottom: 10px;
-            padding: 5px;
+
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border: none;
             border-radius: 5px;
+            font-size: 16px;
         }
-        .online {
-            background: rgba(0, 255, 136, 0.2);
+
+        button {
+            background: #228B22;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
         }
-        .offline {
-            background: rgba(255, 68, 68, 0.2);
+
+        button:hover {
+            background: #32CD32;
         }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .result {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.7);
+        }
+
+        .bet-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .bet-button {
+            padding: 15px;
+            background: #444;
+            border: 2px solid #666;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .bet-button:hover {
+            background: #555;
+            border-color: #888;
+        }
+
+        .bet-button.selected {
+            background: #228B22;
+            border-color: #32CD32;
+        }
+
+        .bet-button.red { background: #DC143C !important; }
+        .bet-button.black { background: #000000 !important; }
+        .bet-button.green { background: #228B22 !important; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <button class="nav-btn" onclick="window.location.href='home.html'">🏠 HOME</button>
-        <div class="server-status" id="serverStatus">Conectando ao servidor...</div>
-        <h1>✈️ AVIATOR</h1>
-        
-        <div class="game-area">
-            <div class="trajectory-line">
-                <svg>
-                    <line id="trajectoryLine" x1="10%" y1="100%" x2="10%" y2="100%" stroke="#ff4444" stroke-width="3" stroke-dasharray="5,5" opacity="0.5"/>
-                </svg>
-            </div>
-            <div class="cloud" style="width: 60px; height: 25px; top: 20%; left: 15%;"></div>
-            <div class="cloud" style="width: 80px; height: 30px; top: 40%; left: 70%;"></div>
-            <div class="cloud" style="width: 50px; height: 20px; top: 60%; left: 40%;"></div>
-            <div class="city" id="city">
-                <div class="building" style="width: 40px; height: 60px;"></div>
-                <div class="building" style="width: 35px; height: 75px;"></div>
-                <div class="building" style="width: 45px; height: 50px;"></div>
-                <div class="building" style="width: 38px; height: 65px;"></div>
-                <div class="building" style="width: 42px; height: 55px;"></div>
-                <div class="building" style="width: 36px; height: 70px;"></div>
-                <div class="building" style="width: 40px; height: 60px;"></div>
-            </div>
-            <div class="plane" id="plane">✈️</div>
-            <div class="multiplier" id="multiplier">1.00x</div>
-        </div>
-
-        <div class="controls">
-            <div class="bet-controls">
-                <input type="number" id="betAmount" value="10" min="1" placeholder="Aposta">
-                <button class="btn-start" id="startBtn" onclick="startGame()">APOSTAR</button>
-            </div>
-            <button class="btn-cashout" id="cashoutBtn" onclick="cashout()" disabled>SACAR</button>
-        </div>
-
-        <div class="message" id="message"></div>
-
-        <div class="stats">
-            <div class="stat">
-                <span class="stat-label">Saldo</span>
-                <span class="stat-value" id="balance">R$ 0</span>
-            </div>
-            <div class="stat">
-                <span class="stat-label">Última Aposta</span>
-                <span class="stat-value" id="lastBet">R$ 0</span>
-            </div>
-            <div class="stat">
-                <span class="stat-label">Último Ganho</span>
-                <span class="stat-value" id="lastWin">R$ 0</span>
-            </div>
+    <h1>🎰 Roleta Europeia</h1>
+    
+    <div class="roulette-container">
+        <div class="roulette-pointer"></div>
+        <div class="roulette-wheel" id="wheel">
+            <div class="inner-ring"></div>
+            <div class="roulette-center"></div>
         </div>
     </div>
 
+    <div class="controls">
+        <div class="bet-section">
+            <label>Valor da Aposta:</label>
+            <input type="number" id="betAmount" value="10" min="1" max="1000">
+        </div>
+
+        <div class="bet-options">
+            <div class="bet-button red" data-bet="red">Vermelho (2x)</div>
+            <div class="bet-button black" data-bet="black">Preto (2x)</div>
+            <div class="bet-button green" data-bet="green">Verde (36x)</div>
+            <div class="bet-button" data-bet="even">Par (2x)</div>
+            <div class="bet-button" data-bet="odd">Ímpar (2x)</div>
+            <div class="bet-button" data-bet="low">1-18 (2x)</div>
+        </div>
+
+        <button id="spinBtn">🎲 GIRAR ROLETA</button>
+    </div>
+
+    <div id="result" class="result" style="display: none;"></div>
+
     <script>
-        const API_URL = 'http://localhost:8080/api';
-        let gameInterval;
-        let planePosition = { x: 10, y: 20 };
-        let cityOffset = 0;
-        let cloudOffset = 0;
-        let isPlaying = false;
+        const wheel = document.getElementById('wheel');
+        const spinBtn = document.getElementById('spinBtn');
+        const resultDiv = document.getElementById('result');
+        const betButtons = document.querySelectorAll('.bet-button');
+        const betAmountInput = document.getElementById('betAmount');
 
-        async function checkServer() {
-            try {
-                const response = await fetch(`${API_URL}/status`);
-                const data = await response.json();
-                document.getElementById('serverStatus').textContent = '🟢 Servidor Online';
-                document.getElementById('serverStatus').className = 'server-status online';
-                updateBalance(data.balance);
-                return true;
-            } catch (error) {
-                document.getElementById('serverStatus').textContent = '🔴 Servidor Offline';
-                document.getElementById('serverStatus').className = 'server-status offline';
-                return false;
-            }
-        }
+        // Números da roleta europeia na ordem correta
+        const rouletteNumbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+        const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
 
-        async function startGame() {
-            const betAmount = parseFloat(document.getElementById('betAmount').value);
-            
-            try {
-                const response = await fetch(`${API_URL}/start`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ bet: betAmount })
-                });
+        let selectedBet = null;
+        let spinning = false;
+
+        // Criar números na roleta
+        function createRouletteNumbers() {
+            rouletteNumbers.forEach((number, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'number-slot';
+                slot.textContent = number;
                 
-                const data = await response.json();
-                
-                if (!data.success) {
-                    showMessage('Aposta inválida!', 'lose');
-                    return;
+                if (number === 0) {
+                    slot.classList.add('green');
+                } else if (redNumbers.includes(number)) {
+                    slot.classList.add('red');
+                } else {
+                    slot.classList.add('black');
                 }
-
-                isPlaying = true;
-                planePosition = { x: 10, y: 20 };
-                cityOffset = 0;
-                cloudOffset = 0;
                 
-                document.getElementById('startBtn').disabled = true;
-                document.getElementById('cashoutBtn').disabled = false;
-                document.getElementById('betAmount').disabled = true;
-                document.getElementById('message').textContent = '';
-                document.getElementById('lastBet').textContent = `R$ ${betAmount.toFixed(2)}`;
+                const angle = (360 / rouletteNumbers.length) * index;
+                slot.style.transform = `rotate(${angle}deg)`;
                 
-                updateBalance(data.balance);
-                animatePlane();
-                
-                gameInterval = setInterval(updateGame, 50);
-            } catch (error) {
-                showMessage('Erro ao conectar com servidor!', 'lose');
-            }
-        }
-
-        async function updateGame() {
-            try {
-                const response = await fetch(`${API_URL}/update`);
-                const data = await response.json();
-                
-                document.getElementById('multiplier').textContent = `${data.multiplier.toFixed(2)}x`;
-                
-                if (data.crashed) {
-                    crash();
-                }
-            } catch (error) {
-                console.error('Erro ao atualizar jogo:', error);
-            }
-        }
-
-        async function cashout() {
-            if (!isPlaying) return;
-            
-            try {
-                const response = await fetch(`${API_URL}/cashout`, { method: 'POST' });
-                const data = await response.json();
-                
-                document.getElementById('lastWin').textContent = `R$ ${data.winAmount.toFixed(2)}`;
-                showMessage(`Você ganhou R$ ${data.winAmount.toFixed(2)}!`, 'win');
-                updateBalance(data.balance);
-                
-                endGame();
-            } catch (error) {
-                showMessage('Erro ao sacar!', 'lose');
-            }
-        }
-
-        function crash() {
-            document.getElementById('multiplier').classList.add('crashed');
-            document.getElementById('lastWin').textContent = `R$ 0.00`;
-            showMessage('CRASH! Você perdeu!', 'lose');
-            endGame();
-        }
-
-        function endGame() {
-            isPlaying = false;
-            clearInterval(gameInterval);
-            
-            document.getElementById('startBtn').disabled = false;
-            document.getElementById('cashoutBtn').disabled = true;
-            document.getElementById('betAmount').disabled = false;
-            
-            setTimeout(() => {
-                document.getElementById('multiplier').classList.remove('crashed');
-                const plane = document.getElementById('plane');
-                plane.style.left = '10%';
-                plane.style.bottom = '20%';
-                plane.style.transform = 'rotate(0deg)';
-                document.getElementById('city').style.transform = 'translateY(0)';
-                const line = document.getElementById('trajectoryLine');
-                line.setAttribute('x2', '10%');
-                line.setAttribute('y2', '100%');
-                const clouds = document.querySelectorAll('.cloud');
-                clouds.forEach(cloud => {
-                    cloud.style.transform = 'translate(0, 0)';
-                });
-            }, 1000);
-        }
-
-        function animatePlane() {
-            if (!isPlaying) return;
-            
-            planePosition.x += 0.4;
-            planePosition.y += 0.4;
-            
-            const plane = document.getElementById('plane');
-            const rotation = -30;
-            const x = Math.min(planePosition.x, 75);
-            const y = Math.min(planePosition.y, 80);
-            
-            plane.style.left = `${x}%`;
-            plane.style.bottom = `${y}%`;
-            plane.style.transform = `rotate(${rotation}deg)`;
-            
-            const line = document.getElementById('trajectoryLine');
-            line.setAttribute('x2', `${x}%`);
-            line.setAttribute('y2', `${100 - y}%`);
-            
-            cityOffset += 0.6;
-            const city = document.getElementById('city');
-            city.style.transform = `translateY(${cityOffset}px)`;
-            
-            cloudOffset += 0.3;
-            const clouds = document.querySelectorAll('.cloud');
-            clouds.forEach((cloud, index) => {
-                const speed = 1 + (index * 0.2);
-                cloud.style.transform = `translate(-${cloudOffset * speed}px, ${cloudOffset * 0.5}px)`;
+                wheel.appendChild(slot);
             });
-            
-            if (isPlaying) {
-                requestAnimationFrame(animatePlane);
+        }
+
+        createRouletteNumbers();
+
+        // Seleção de aposta
+        betButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                betButtons.forEach(b => b.classList.remove('selected'));
+                button.classList.add('selected');
+                selectedBet = button.dataset.bet;
+            });
+        });
+
+        spinBtn.addEventListener('click', async () => {
+            if (!selectedBet) {
+                alert('Selecione um tipo de aposta!');
+                return;
             }
-        }
 
-        function updateBalance(balance) {
-            document.getElementById('balance').textContent = `R$ ${balance.toFixed(2)}`;
-        }
+            if (spinning) return;
 
-        function showMessage(text, type) {
-            const msg = document.getElementById('message');
-            msg.textContent = text;
-            msg.className = `message ${type}`;
-        }
+            const betAmount = parseInt(betAmountInput.value);
+            if (betAmount < 1) {
+                alert('Valor mínimo de aposta é 1!');
+                return;
+            }
 
-        checkServer();
-        setInterval(checkServer, 5000);
+            spinning = true;
+            spinBtn.disabled = true;
+            spinBtn.textContent = '🎲 GIRANDO...';
+            resultDiv.style.display = 'none';
+
+            try {
+                // Inicia o giro
+                const spinResponse = await fetch('http://localhost:5000/api/spin', {
+                    method: 'POST'
+                });
+
+                if (!spinResponse.ok) {
+                    throw new Error('Erro ao iniciar giro');
+                }
+
+                // Animação da roleta
+                const randomRotation = 1440 + Math.random() * 1440;
+                wheel.style.transform = `rotate(${randomRotation}deg)`;
+
+                // Aguarda resultado
+                let result = null;
+                while (!result) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    const resultResponse = await fetch('http://localhost:5000/api/result');
+                    const data = await resultResponse.json();
+                    
+                    if (data.status === 'finished') {
+                        result = data.result;
+                        break;
+                    }
+                }
+
+                // Exibe resultado
+                setTimeout(() => {
+                    displayResult(result, selectedBet, betAmount);
+                    spinning = false;
+                    spinBtn.disabled = false;
+                    spinBtn.textContent = '🎲 GIRAR ROLETA';
+                }, 3000);
+
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro de conexão com o servidor!');
+                spinning = false;
+                spinBtn.disabled = false;
+                spinBtn.textContent = '🎲 GIRAR ROLETA';
+            }
+        });
+
+        function displayResult(result, bet, amount) {
+            const { number, color } = result;
+            let won = false;
+            let payout = 0;
+
+            switch (bet) {
+                case 'red':
+                    won = color === 'red';
+                    payout = won ? amount * 2 : 0;
+                    break;
+                case 'black':
+                    won = color === 'black';
+                    payout = won ? amount * 2 : 0;
+                    break;
+                case 'green':
+                    won = color === 'green';
+                    payout = won ? amount * 36 : 0;
+                    break;
+                case 'even':
+                    won = number > 0 && number % 2 === 0;
+                    payout = won ? amount * 2 : 0;
+                    break;
+                case 'odd':
+                    won = number > 0 && number % 2 === 1;
+                    payout = won ? amount * 2 : 0;
+                    break;
+                case 'low':
+                    won = number >= 1 && number <= 18;
+                    payout = won ? amount * 2 : 0;
+                    break;
+            }
+
+            resultDiv.innerHTML = `
+                <div>🎯 Resultado: <span class="${color}">${number} (${color.toUpperCase()})</span></div>
+                <div>${won ? '🎉 VOCÊ GANHOU!' : '😔 Você perdeu'}</div>
+                <div>💰 ${won ? `Ganhou: ${payout}` : `Perdeu: ${amount}`}</div>
+            `;
+            resultDiv.style.display = 'block';
+        }
     </script>
 </body>
 </html>

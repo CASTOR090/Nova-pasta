@@ -84,7 +84,7 @@ class BlackjackGame:
         else:
             return {'won': False, 'player_total': player_total, 'dealer_total': dealer_total, 'win_amount': 0}
 
-game = BlackjackGame(1000)
+game = BlackjackGame(50000)
 
 @app.route('/api/blackjack/start', methods=['POST'])
 def start():
@@ -134,6 +134,14 @@ def status():
     return jsonify({
         'balance': game.balance,
         'is_playing': game.is_playing
+    })
+
+@app.route('/api/blackjack/reset', methods=['POST'])
+def reset_balance():
+    game.balance = 50000
+    return jsonify({
+        'balance': game.balance,
+        'message': 'Saldo resetado para R$ 50.000'
     })
 
 if __name__ == '__main__':

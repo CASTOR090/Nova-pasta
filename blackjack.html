@@ -417,7 +417,45 @@
             msg.className = `message ${type}`;
         }
 
+        async function resetBalance() {
+            try {
+                const response = await fetch(`${API_URL}/reset`, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                updateBalance(data.balance);
+                showMessage('💰 Saldo resetado para R$ 50.000!', 'win');
+            } catch (error) {
+                console.error('Erro:', error);
+                showMessage('❌ Erro ao resetar saldo! Verifique se o servidor está rodando.', 'lose');
+            }
+        }
+
         checkServer();
+
+        // Resetar saldo ao sair da página
+        window.addEventListener('beforeunload', function() {
+            fetch(`${API_URL}/reset`, { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                keepalive: true
+            }).catch(() => {});
+        });
+
+        // Resetar saldo ao navegar para outra página
+        window.addEventListener('pagehide', function() {
+            fetch(`${API_URL}/reset`, { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                keepalive: true
+            }).catch(() => {});
+        });
     </script>
 </body>
 </html>
