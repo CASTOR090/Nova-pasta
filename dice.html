@@ -316,9 +316,28 @@
 
     <script>
         const diceSymbols = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-        let balance = 1000;
         let selectedBet = null;
         let isRolling = false;
+        let balance = 1000;
+
+        // Carregar saldo inicial
+        async function loadBalance() {
+            try {
+                const response = await fetch('http://localhost:8080/api/dice/status');
+                const data = await response.json();
+                balance = data.balance;
+                updateBalance();
+                console.log('Saldo carregado:', balance);
+            } catch (error) {
+                console.error('Erro ao carregar saldo:', error);
+                // Fallback para saldo padrão se não conseguir conectar
+                balance = 1000;
+                updateBalance();
+            }
+        }
+
+        // Carregar saldo ao iniciar
+        loadBalance();
 
         function selectBet(betType) {
             if (isRolling) return;
@@ -369,8 +388,6 @@
                 return;
             }
 
-            balance -= bet;
-            updateBalance();
             isRolling = true;
             document.getElementById('rollBtn').disabled = true;
 
@@ -388,79 +405,64 @@
                 updateDice(dice2, randomValue2);
                 counter++;
 
-                if (counter > 25) {
+                if (counter > 50) {
                     clearInterval(interval);
                     
-                    // Resultado final
-                    const result1 = Math.floor(Math.random() * 6) + 1;
-                    const result2 = Math.floor(Math.random() * 6) + 1;
-                    const total = result1 + result2;
-                    
-                    updateDice(dice1, result1);
-                    updateDice(dice2, result2);
-                    document.getElementById('total').textContent = `Total: ${total}`;
-                    
-                    dice1.classList.remove('rolling');
-                    dice2.classList.remove('rolling');
-                    
-                    checkWin(result1, result2, total, bet);
-                    
-                    isRolling = false;
-                    document.getElementById('rollBtn').disabled = false;
+                    // Fazer aposta no servidor APÓS a animação
+                    fetch('http://localhost:8080/api/dice/roll', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            bet: bet,
+                            betType: selectedBet
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateDice(dice1, data.dice1);
+                            updateDice(dice2, data.dice2);
+                            document.getElementById('total').textContent = `Total: ${data.total}`;
+                            
+                            balance = data.balance;
+                            updateBalance();
+                            
+                            const betNames = {
+                                'baixo': 'BAIXO',
+                                'sete': 'SETE',
+                                'alto': 'ALTO',
+                                'par': 'PAR',
+                                'dupla': 'DUPLA',
+                                'impar': 'ÍMPAR'
+                            };
+                            
+                            if (data.won) {
+                                showMessage(`🎉 ${betNames[selectedBet]}! Ganhou R$ ${data.winAmount.toFixed(2)}!`, 'win');
+                            } else {
+                                showMessage(`😢 Total: ${data.total} - Não foi ${betNames[selectedBet].toLowerCase()}`, 'lose');
+                            }
+                            
+                            document.getElementById('lastWin').textContent = `R$ ${data.winAmount.toFixed(2)}`;
+                        } else {
+                            showMessage(data.message || 'Erro na aposta', 'lose');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        showMessage('Erro de conexão', 'lose');
+                    })
+                    .finally(() => {
+                        dice1.classList.remove('rolling');
+                        dice2.classList.remove('rolling');
+                        isRolling = false;
+                        document.getElementById('rollBtn').disabled = false;
+                    });
                 }
             }, 80);
         }
 
-        function checkWin(dice1, dice2, total, bet) {
-            let won = false;
-            let multiplier = 0;
-            let message = '';
-
-            switch(selectedBet) {
-                case 'baixo':
-                    won = total >= 2 && total <= 6;
-                    multiplier = 2;
-                    message = won ? `🎉 BAIXO! Total: ${total}` : `😢 Total: ${total} (não é baixo)`;
-                    break;
-                case 'sete':
-                    won = total === 7;
-                    multiplier = 5;
-                    message = won ? `🎯 SETE PERFEITO!` : `😢 Total: ${total} (não é 7)`;
-                    break;
-                case 'alto':
-                    won = total >= 8 && total <= 12;
-                    multiplier = 2;
-                    message = won ? `🎉 ALTO! Total: ${total}` : `😢 Total: ${total} (não é alto)`;
-                    break;
-                case 'par':
-                    won = total % 2 === 0;
-                    multiplier = 2;
-                    message = won ? `✅ PAR! Total: ${total}` : `😢 Total: ${total} (ímpar)`;
-                    break;
-                case 'dupla':
-                    won = dice1 === dice2;
-                    multiplier = 6;
-                    message = won ? `🎲 DUPLA ${dice1}!` : `😢 ${dice1} e ${dice2} (não é dupla)`;
-                    break;
-                case 'impar':
-                    won = total % 2 === 1;
-                    multiplier = 2;
-                    message = won ? `✅ ÍMPAR! Total: ${total}` : `😢 Total: ${total} (par)`;
-                    break;
-            }
-
-            let winAmount = 0;
-            if (won) {
-                winAmount = bet * multiplier;
-                balance += winAmount;
-                showMessage(message + ` - Ganhou R$ ${winAmount.toFixed(2)}!`, 'win');
-            } else {
-                showMessage(message, 'lose');
-            }
-
-            document.getElementById('lastWin').textContent = `R$ ${winAmount.toFixed(2)}`;
-            updateBalance();
-        }
 
         function updateBalance() {
             document.getElementById('balance').textContent = `R$ ${balance.toFixed(2)}`;

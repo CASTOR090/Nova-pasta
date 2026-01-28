@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Debug Casino</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px; margin: 5px; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .error { background: #ffebee; }
+        .success { background: #e8f5e8; }
+    </style>
+</head>
+<body>
+    <h1>Debug Casino</h1>
+    
+    <h2>Testes de Conexão</h2>
+    <button onclick="testarServidor()">Testar Servidor</button>
+    <button onclick="testarLogin()">Testar Login</button>
+    <button onclick="testarCadastro()">Testar Cadastro</button>
+    <button onclick="testarRoleta()">Testar Roleta</button>
+    
+    <div id="resultados"></div>
+
+    <script>
+        function addResult(message, isError = false) {
+            const div = document.createElement('div');
+            div.className = 'result ' + (isError ? 'error' : 'success');
+            div.innerHTML = new Date().toLocaleTimeString() + ': ' + message;
+            document.getElementById('resultados').appendChild(div);
+        }
+
+        async function testarServidor() {
+            try {
+                const response = await fetch('http://localhost:8080/api/test');
+                const data = await response.json();
+                addResult('Servidor OK: ' + JSON.stringify(data));
+            } catch (error) {
+                addResult('Erro servidor: ' + error.message, true);
+            }
+        }
+
+        async function testarLogin() {
+            try {
+                const response = await fetch('http://localhost:8080/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'test@test.com', senha: '123' })
+                });
+                const data = await response.json();
+                addResult('Login OK: ' + JSON.stringify(data));
+            } catch (error) {
+                addResult('Erro login: ' + error.message, true);
+            }
+        }
+
+        async function testarCadastro() {
+            try {
+                const response = await fetch('http://localhost:8080/api/cadastro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome: 'Teste', email: 'test@test.com', senha: '123' })
+                });
+                const data = await response.json();
+                addResult('Cadastro OK: ' + JSON.stringify(data));
+            } catch (error) {
+                addResult('Erro cadastro: ' + error.message, true);
+            }
+        }
+
+        async function testarRoleta() {
+            try {
+                const response = await fetch('http://localhost:8080/api/spin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bet_type: 'red', bet_amount: 10 })
+                });
+                const data = await response.json();
+                addResult('Roleta OK: ' + JSON.stringify(data));
+            } catch (error) {
+                addResult('Erro roleta: ' + error.message, true);
+            }
+        }
+    </script>
+</body>
+</html>

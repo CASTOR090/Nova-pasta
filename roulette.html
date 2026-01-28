@@ -1,667 +1,513 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roleta</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f4c3a, #1a5f4a);
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #0d4f0d 0%, #1a5c1a 50%, #0d4f0d 100%);
+            color: white;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            color: white;
-            padding: 20px;
         }
-        .container {
-            background: linear-gradient(145deg, #2d5a2d, #1a4d1a);
-            padding: 40px;
-            border-radius: 25px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-            max-width: 900px;
-            width: 100%;
-            border: 5px solid #8B4513;
-        }
-        h1 {
-            font-size: 3.5em;
-            margin-bottom: 30px;
-            background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .nav-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background: #ffd700;
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .roulette-area {
+
+        .roulette-container {
             position: relative;
-            margin: 40px 0;
+            margin: 20px 0;
         }
-        .wheel {
-            width: 650px;
-            height: 650px;
+
+        .roulette-wheel {
+            width: 400px;
+            height: 400px;
             border-radius: 50%;
-            margin: 0 auto;
+            background: radial-gradient(circle, #8B4513 60%, #654321 100%);
+            border: 15px solid #8B4513;
             position: relative;
-            background: conic-gradient(
-                #00aa00 0deg 9.73deg,
-                #000000 9.73deg 19.46deg,
-                #ff0000 19.46deg 29.19deg,
-                #000000 29.19deg 38.92deg,
-                #ff0000 38.92deg 48.65deg,
-                #000000 48.65deg 58.38deg,
-                #ff0000 58.38deg 68.11deg,
-                #000000 68.11deg 77.84deg,
-                #ff0000 77.84deg 87.57deg,
-                #000000 87.57deg 97.3deg,
-                #ff0000 97.3deg 107.03deg,
-                #000000 107.03deg 116.76deg,
-                #ff0000 116.76deg 126.49deg,
-                #000000 126.49deg 136.22deg,
-                #ff0000 136.22deg 145.95deg,
-                #000000 145.95deg 155.68deg,
-                #ff0000 155.68deg 165.41deg,
-                #000000 165.41deg 175.14deg,
-                #ff0000 175.14deg 184.87deg,
-                #000000 184.87deg 194.6deg,
-                #ff0000 194.6deg 204.33deg,
-                #000000 204.33deg 214.06deg,
-                #ff0000 214.06deg 223.79deg,
-                #000000 223.79deg 233.52deg,
-                #ff0000 233.52deg 243.25deg,
-                #000000 243.25deg 252.98deg,
-                #ff0000 252.98deg 262.71deg,
-                #000000 262.71deg 272.44deg,
-                #ff0000 272.44deg 282.17deg,
-                #000000 282.17deg 291.9deg,
-                #ff0000 291.9deg 301.63deg,
-                #000000 301.63deg 311.36deg,
-                #ff0000 311.36deg 321.09deg,
-                #000000 321.09deg 330.82deg,
-                #ff0000 330.82deg 340.55deg,
-                #000000 340.55deg 350.28deg,
-                #ff0000 350.28deg 360deg
-            );
-            border: 20px solid #8B4513;
-            box-shadow: 
-                0 0 0 8px #DAA520,
-                0 0 40px rgba(139, 69, 19, 0.8),
-                inset 0 0 30px rgba(0, 0, 0, 0.3);
-            transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+            transition: transform 8s cubic-bezier(0.25, 0.1, 0.25, 1);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
         }
-        .wheel.spinning {
-            transform: rotate(1800deg);
-        }
-        .pointer {
+
+        .number-slot {
             position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-top: 40px solid #DAA520;
-            z-index: 10;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            width: 30px;
+            height: 67px;
+            transform-origin: 20px 210px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            padding-top: 9px;
+            left: 186px;
+            top: -10px;
         }
-        .center-circle {
+
+        .red {
+            background: #DC143C;
+        }
+
+        .black {
+            background: #000000;
+        }
+
+        .green {
+            background: #228B22;
+        }
+
+        .roulette-center {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            background: radial-gradient(circle, #DAA520, #B8860B);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #FFD700, #DAA520);
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #000;
-            z-index: 5;
-            border: 3px solid #8B4513;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            border: 5px solid #8B4513;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
         }
-        .wheel-number {
+
+        .inner-ring {
             position: absolute;
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,1);
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.9);
-            border: 2px solid rgba(255,255,255,0.6);
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: #228B22;
+            border: 3px solid #FFD700;
         }
-        .numbers-grid {
-            display: grid;
-            grid-template-columns: repeat(14, 1fr);
-            gap: 2px;
-            margin: 20px 0;
-            max-width: 800px;
-            margin: 20px auto;
+
+        .roulette-pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #FFD700;
+            z-index: 10;
         }
-        .number-bet {
-            padding: 6px 2px;
-            font-size: 0.8em;
-            color: white;
-            border: 2px solid #666;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            min-height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .number-bet.red {
-            background: linear-gradient(145deg, #ff4444, #cc3333);
-        }
-        .number-bet.black {
-            background: linear-gradient(145deg, #333333, #111111);
-        }
-        .number-bet.green {
-            background: linear-gradient(145deg, #00aa00, #008800);
-        }
-        .number-bet:hover:not(:disabled) {
-            transform: translateY(-2px);
-            border-color: #ffd700;
-        }
-        .number-bet.selected {
-            border-color: #ffd700;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-        }
-        .bet-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin: 40px 0;
-        }
-        .bet-option {
-            padding: 15px 20px;
-            font-size: 1.1em;
-            background: linear-gradient(145deg, #4a4a4a, #2a2a2a);
-            color: white;
-            border: 2px solid #666;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        .bet-option:hover:not(:disabled) {
-            transform: translateY(-2px);
-            border-color: #ffd700;
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-        }
-        .bet-option.selected {
-            background: linear-gradient(145deg, #ffd700, #ffed4e);
-            color: #000;
-            border-color: #ffd700;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-        }
-        .bet-option.red {
-            background: linear-gradient(145deg, #ff4444, #cc3333);
-        }
-        .bet-option.black {
-            background: linear-gradient(145deg, #333333, #111111);
-        }
+
         .controls {
-            margin: 30px 0;
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        input {
-            padding: 15px;
-            font-size: 1.2em;
-            border: 2px solid #666;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
             border-radius: 10px;
-            width: 150px;
             text-align: center;
-            background: rgba(255, 255, 255, 0.9);
+            margin: 20px 0;
         }
-        button {
-            padding: 15px 40px;
-            font-size: 1.3em;
-            background: linear-gradient(145deg, #ffd700, #ffed4e);
-            color: #000;
-            border: 2px solid #ffd700;
-            border-radius: 10px;
-            cursor: pointer;
+
+        .bet-section {
+            margin: 10px 0;
+        }
+
+        .balance {
+            font-size: 18px;
             font-weight: bold;
-            transition: all 0.3s;
+            color: #FFD700;
+            margin-bottom: 10px;
         }
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+
+        input,
+        button {
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
         }
+
+        button {
+            background: #228B22;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #32CD32;
+        }
+
         button:disabled {
-            opacity: 0.5;
+            background: #666;
             cursor: not-allowed;
         }
+
         .result {
-            font-size: 2.5em;
-            margin: 20px 0;
+            font-size: 24px;
             font-weight: bold;
-            min-height: 60px;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.7);
         }
+
+        .bet-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .bet-button {
+            padding: 15px;
+            background: #444;
+            border: 2px solid #666;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .bet-button:hover {
+            background: #555;
+            border-color: #888;
+        }
+
+        .bet-button.selected {
+            background: #228B22;
+            border-color: #32CD32;
+        }
+
+        .bet-button.red {
+            background: #DC143C !important;
+        }
+
+        .bet-button.black {
+            background: #000000 !important;
+        }
+
+        .bet-button.green {
+            background: #228B22 !important;
+        }
+
         .stats {
             display: flex;
             justify-content: space-around;
-            margin-top: 30px;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .stat {
+            margin-top: 20px;
+            padding: 15px;
             background: rgba(255, 255, 255, 0.1);
-            padding: 15px 30px;
             border-radius: 10px;
+            flex-wrap: wrap;
+            gap: 30px;
         }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+
         .stat-label {
-            font-size: 1em;
+            font-size: 0.9em;
             opacity: 0.8;
         }
+
         .stat-value {
-            font-size: 1.8em;
+            font-size: 1.5em;
             font-weight: bold;
             margin-top: 5px;
         }
-        .win { color: #00ff88; }
-        .lose { color: #ff4444; }
     </style>
 </head>
+
 <body>
-    <button class="nav-btn" onclick="window.location.href='home.html'">🏠 HOME</button>
+    <button onclick="window.location.href='home.html'"
+        style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: #ffd700; color: #000; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">🏠
+        HOME</button>
 
-    <div class="container">
-        <h1>🎪 ROLETA</h1>
-        
-        <div class="roulette-area">
-            <div class="pointer"></div>
-            <div class="wheel" id="wheel">
-                <!-- 0 VERDE (4.86°) -->
-                <div class="wheel-number" style="top: 1%; left: 50%;">0</div>
-                
-                <!-- 1 PRETO (14.59°) -->
-                <div class="wheel-number" style="top: 4%; left: 56%;">1</div>
-                
-                <!-- 2 VERMELHO (24.32°) -->
-                <div class="wheel-number" style="top: 8%; left: 62%;">2</div>
-                
-                <!-- 3 PRETO (34.05°) -->
-                <div class="wheel-number" style="top: 13%; left: 68%;">3</div>
-                
-                <!-- 4 VERMELHO (43.78°) -->
-                <div class="wheel-number" style="top: 19%; left: 73%;">4</div>
-                
-                <!-- 5 PRETO (53.51°) -->
-                <div class="wheel-number" style="top: 25%; left: 78%;">5</div>
-                
-                <!-- 6 VERMELHO (63.24°) -->
-                <div class="wheel-number" style="top: 32%; left: 82%;">6</div>
-                
-                <!-- 7 PRETO (72.97°) -->
-                <div class="wheel-number" style="top: 39%; left: 86%;">7</div>
-                
-                <!-- 8 VERMELHO (82.7°) -->
-                <div class="wheel-number" style="top: 46%; left: 89%;">8</div>
-                
-                <!-- 9 PRETO (92.43°) -->
-                <div class="wheel-number" style="top: 54%; left: 91%;">9</div>
-                
-                <!-- 10 VERMELHO (102.16°) -->
-                <div class="wheel-number" style="top: 61%; left: 91%;">10</div>
-                
-                <!-- 11 PRETO (111.89°) -->
-                <div class="wheel-number" style="top: 68%; left: 89%;">11</div>
-                
-                <!-- 12 VERMELHO (121.62°) -->
-                <div class="wheel-number" style="top: 75%; left: 86%;">12</div>
-                
-                <!-- 13 PRETO (131.35°) -->
-                <div class="wheel-number" style="top: 81%; left: 82%;">13</div>
-                
-                <!-- 14 VERMELHO (141.08°) -->
-                <div class="wheel-number" style="top: 87%; left: 78%;">14</div>
-                
-                <!-- 15 PRETO (150.81°) -->
-                <div class="wheel-number" style="top: 92%; left: 73%;">15</div>
-                
-                <!-- 16 VERMELHO (160.54°) -->
-                <div class="wheel-number" style="top: 96%; left: 68%;">16</div>
-                
-                <!-- 17 PRETO (170.27°) -->
-                <div class="wheel-number" style="top: 99%; left: 62%;">17</div>
-                
-                <!-- 18 VERMELHO (180°) -->
-                <div class="wheel-number" style="top: 100%; left: 50%;">18</div>
-                
-                <!-- 19 PRETO (189.73°) -->
-                <div class="wheel-number" style="top: 99%; left: 38%;">19</div>
-                
-                <!-- 20 VERMELHO (199.46°) -->
-                <div class="wheel-number" style="top: 96%; left: 32%;">20</div>
-                
-                <!-- 21 PRETO (209.19°) -->
-                <div class="wheel-number" style="top: 92%; left: 27%;">21</div>
-                
-                <!-- 22 VERMELHO (218.92°) -->
-                <div class="wheel-number" style="top: 87%; left: 22%;">22</div>
-                
-                <!-- 23 PRETO (228.65°) -->
-                <div class="wheel-number" style="top: 81%; left: 18%;">23</div>
-                
-                <!-- 24 VERMELHO (238.38°) -->
-                <div class="wheel-number" style="top: 75%; left: 14%;">24</div>
-                
-                <!-- 25 PRETO (248.11°) -->
-                <div class="wheel-number" style="top: 68%; left: 11%;">25</div>
-                
-                <!-- 26 VERMELHO (257.84°) -->
-                <div class="wheel-number" style="top: 61%; left: 9%;">26</div>
-                
-                <!-- 27 PRETO (267.57°) -->
-                <div class="wheel-number" style="top: 54%; left: 9%;">27</div>
-                
-                <!-- 28 VERMELHO (277.3°) -->
-                <div class="wheel-number" style="top: 46%; left: 11%;">28</div>
-                
-                <!-- 29 PRETO (287.03°) -->
-                <div class="wheel-number" style="top: 39%; left: 14%;">29</div>
-                
-                <!-- 30 VERMELHO (296.76°) -->
-                <div class="wheel-number" style="top: 32%; left: 18%;">30</div>
-                
-                <!-- 31 PRETO (306.49°) -->
-                <div class="wheel-number" style="top: 25%; left: 22%;">31</div>
-                
-                <!-- 32 VERMELHO (316.22°) -->
-                <div class="wheel-number" style="top: 19%; left: 27%;">32</div>
-                
-                <!-- 33 PRETO (325.95°) -->
-                <div class="wheel-number" style="top: 13%; left: 32%;">33</div>
-                
-                <!-- 34 VERMELHO (335.68°) -->
-                <div class="wheel-number" style="top: 8%; left: 38%;">34</div>
-                
-                <!-- 35 PRETO (345.41°) -->
-                <div class="wheel-number" style="top: 4%; left: 44%;">35</div>
-                
-                <!-- 36 VERMELHO (355.14°) -->
-                <div class="wheel-number" style="top: 2%; left: 47%;">36</div>
-                <div class="center-circle">🎪</div>
-            </div>
+
+
+    <div class="roulette-container">
+        <div class="roulette-pointer"></div>
+        <div class="roulette-wheel" id="wheel">
+            <div class="inner-ring"></div>
+            <div class="roulette-center"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="bet-section">
+            <label>Valor da Aposta:</label>
+            <input type="number" id="betAmount" value="10" min="1" max="1000">
         </div>
 
-        <div class="result" id="result">Escolha sua aposta!</div>
-
-        <div class="numbers-grid" id="numbersGrid">
-            <!-- Números serão gerados pelo JavaScript -->
+        <div class="bet-options">
+            <div class="bet-button red" data-bet="red">Vermelho (2x)</div>
+            <div class="bet-button black" data-bet="black">Preto (2x)</div>
+            <div class="bet-button green" data-bet="green">Verde (36x)</div>
+            <div class="bet-button" data-bet="even">Par (2x)</div>
+            <div class="bet-button" data-bet="odd">Ímpar (2x)</div>
+            <div class="bet-button" data-bet="low">1-18 (2x)</div>
         </div>
 
-        <div class="bet-grid">
-            <button class="bet-option red" onclick="selectBet('vermelho')" id="btnVermelho">VERMELHO<br>2x</button>
-            <button class="bet-option black" onclick="selectBet('preto')" id="btnPreto">PRETO<br>2x</button>
-            <button class="bet-option" onclick="selectBet('par')" id="btnPar">PAR<br>2x</button>
-            <button class="bet-option" onclick="selectBet('impar')" id="btnImpar">ÍMPAR<br>2x</button>
-            <button class="bet-option" onclick="selectBet('baixo')" id="btnBaixo">1-18<br>2x</button>
-            <button class="bet-option" onclick="selectBet('alto')" id="btnAlto">19-36<br>2x</button>
-        </div>
+        <button id="spinBtn">🎲 GIRAR ROLETA</button>
+    </div>
 
-        <div class="controls">
-            <input type="number" id="betAmount" value="10" min="1" placeholder="Aposta">
-            <button id="spinBtn" onclick="spin()">GIRAR ROLETA</button>
-        </div>
+    <div id="result" class="result" style="display: none;"></div>
 
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-label">Saldo</div>
-                <div class="stat-value" id="balance">R$ 1000</div>
-            </div>
-            <div class="stat">
-                <div class="stat-label">Aposta Atual</div>
-                <div class="stat-value" id="currentBet">Nenhuma</div>
-            </div>
-            <div class="stat">
-                <div class="stat-label">Último Ganho</div>
-                <div class="stat-value" id="lastWin">R$ 0</div>
-            </div>
+    <div class="stats">
+        <div class="stat">
+            <span class="stat-label">Saldo</span>
+            <span class="stat-value" id="balance">R$ 1000</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Última Aposta</span>
+            <span class="stat-value" id="lastBet">R$ 0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Último Ganho</span>
+            <span class="stat-value" id="lastWin">R$ 0</span>
         </div>
     </div>
 
     <script>
-        const redNumbers = [2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36];
-        const blackNumbers = [1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35];
-        
-        let balance = 1000;
+        const wheel = document.getElementById('wheel');
+        const spinBtn = document.getElementById('spinBtn');
+        const resultDiv = document.getElementById('result');
+        const betButtons = document.querySelectorAll('.bet-button');
+        const betAmountInput = document.getElementById('betAmount');
+
+        // Números da roleta europeia na ordem correta
+        const rouletteNumbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+        const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+
         let selectedBet = null;
-        let selectedNumber = null;
-        let isSpinning = false;
+        let spinning = false;
+        // Verificar se usuário está logado
+        if (!localStorage.getItem('userId')) {
+            window.location.href = 'index.html';
+        }
 
-        // Gerar grid de números
-        function generateNumbersGrid() {
-            const numbersGrid = document.getElementById('numbersGrid');
-            
-            // Primeira linha: 0 e 00
-            const zeroBtn = document.createElement('button');
-            zeroBtn.className = 'number-bet green';
-            zeroBtn.textContent = '0';
-            zeroBtn.onclick = () => selectNumber(0);
-            zeroBtn.id = 'num0';
-            zeroBtn.style.gridColumn = 'span 7';
-            numbersGrid.appendChild(zeroBtn);
-            
-            const doubleZeroBtn = document.createElement('button');
-            doubleZeroBtn.className = 'number-bet green';
-            doubleZeroBtn.textContent = '00';
-            doubleZeroBtn.onclick = () => selectNumber(37);
-            doubleZeroBtn.id = 'num37';
-            doubleZeroBtn.style.gridColumn = 'span 7';
-            numbersGrid.appendChild(doubleZeroBtn);
-            
-            // Números 1-36 organizados em 3 fileiras de 12
-            for (let row = 0; row < 3; row++) {
-                for (let col = 1; col <= 12; col++) {
-                    const number = (col - 1) * 3 + row + 1;
-                    if (number <= 36) {
-                        const btn = document.createElement('button');
-                        btn.textContent = number;
-                        btn.onclick = () => selectNumber(number);
-                        btn.id = `num${number}`;
-                        
-                        // Vermelhos pares, pretos ímpares
-                        if (number % 2 === 0) {
-                            btn.className = 'number-bet red';
-                        } else {
-                            btn.className = 'number-bet black';
-                        }
-                        
-                        numbersGrid.appendChild(btn);
-                    }
-                }
+        // Carregar saldo do servidor
+        async function loadBalance() {
+            try {
+                const response = await fetch('http://localhost:8080/api/status');
+                const data = await response.json();
+                balance = data.balance || 1000;
+                updateBalance();
+            } catch (error) {
+                balance = 1000;
+                updateBalance();
             }
         }
 
-        function selectNumber(number) {
-            if (isSpinning) return;
-            
-            // Remove seleção anterior
-            document.querySelectorAll('.number-bet').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            document.querySelectorAll('.bet-option').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            
-            // Seleciona número
-            document.getElementById(`num${number}`).classList.add('selected');
-            selectedBet = 'numero';
-            selectedNumber = number;
-            
-            document.getElementById('currentBet').textContent = `NÚMERO ${number}`;
-        }
+        loadBalance();
 
-        function selectBet(betType) {
-            if (isSpinning) return;
-            
-            // Remove seleção anterior
-            document.querySelectorAll('.bet-option').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            document.querySelectorAll('.number-bet').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            
-            document.getElementById(`btn${betType.charAt(0).toUpperCase() + betType.slice(1)}`).classList.add('selected');
-            selectedBet = betType;
-            selectedNumber = null;
-            
-            const betNames = {
-                'vermelho': 'VERMELHO',
-                'preto': 'PRETO', 
-                'par': 'PAR',
-                'impar': 'ÍMPAR',
-                'baixo': '1-18',
-                'alto': '19-36'
-            };
-            
-            document.getElementById('currentBet').textContent = betNames[betType];
-        }
-
-        function spin() {
-            if (isSpinning || !selectedBet) {
-                if (!selectedBet) {
-                    showResult('Escolha uma aposta primeiro!', 'lose');
-                }
-                return;
-            }
-
-            const bet = parseFloat(document.getElementById('betAmount').value);
-            if (bet <= 0 || bet > balance) {
-                showResult('Aposta inválida!', 'lose');
-                return;
-            }
-
-            balance -= bet;
-            updateBalance();
-            isSpinning = true;
-            document.getElementById('spinBtn').disabled = true;
-
-            const wheel = document.getElementById('wheel');
-            wheel.classList.add('spinning');
-
-            setTimeout(() => {
-                const result = Math.floor(Math.random() * 38); // 0-37 (incluindo 00)
-                wheel.classList.remove('spinning');
-                
-                checkWin(result, bet);
-                
-                isSpinning = false;
-                document.getElementById('spinBtn').disabled = false;
-            }, 3000);
-        }
-
-        function checkWin(number, bet) {
-            let won = false;
-            let multiplier = 0;
-            let message = '';
-
-            const isRed = redNumbers.includes(number);
-            const isBlack = blackNumbers.includes(number);
-            const isEven = number > 0 && number < 37 && number % 2 === 0;
-            const isOdd = number > 0 && number < 37 && number % 2 === 1;
-            const displayNumber = number === 37 ? '00' : number;
-
-            switch(selectedBet) {
-                case 'vermelho':
-                    won = isRed;
-                    multiplier = 2;
-                    message = `🎪 ${displayNumber} ${isRed ? '(VERMELHO)' : isBlack ? '(PRETO)' : '(ZERO)'}`;
-                    break;
-                case 'preto':
-                    won = isBlack;
-                    multiplier = 2;
-                    message = `🎪 ${displayNumber} ${isBlack ? '(PRETO)' : isRed ? '(VERMELHO)' : '(ZERO)'}`;
-                    break;
-                case 'par':
-                    won = isEven;
-                    multiplier = 2;
-                    message = `🎪 ${displayNumber} ${(number === 0 || number === 37) ? '(ZERO)' : isEven ? '(PAR)' : '(ÍMPAR)'}`;
-                    break;
-                case 'impar':
-                    won = isOdd;
-                    multiplier = 2;
-                    message = `🎪 ${displayNumber} ${(number === 0 || number === 37) ? '(ZERO)' : isOdd ? '(ÍMPAR)' : '(PAR)'}`;
-                    break;
-                case 'baixo':
-                    won = number >= 1 && number <= 18;
-                    multiplier = 2;
-                    message = `🎪 ${displayNumber} ${(number === 0 || number === 37) ? '(ZERO)' : number <= 18 ? '(BAIXO)' : '(ALTO)'}`;
-                    break;
-                case 'alto':
-                    won = number >= 19 && number <= 36;
-                    multiplier = 2;
-                    message = `🎪 ${displayNumber} ${(number === 0 || number === 37) ? '(ZERO)' : number >= 19 ? '(ALTO)' : '(BAIXO)'}`;
-                    break;
-                case 'numero':
-                    won = number === selectedNumber;
-                    multiplier = 38;
-                    message = `🎪 ${displayNumber} ${won ? '(SEU NÚMERO!)' : ''}`;
-                    break;
-            }
-
-            let winAmount = 0;
-            if (won) {
-                winAmount = bet * multiplier;
-                balance += winAmount;
-                showResult(`${message} - Ganhou R$ ${winAmount.toFixed(2)}!`, 'win');
-            } else {
-                showResult(`${message} - Perdeu!`, 'lose');
-            }
-
-            document.getElementById('lastWin').textContent = `R$ ${winAmount.toFixed(2)}`;
-            updateBalance();
-        }
-
+        // Função para atualizar saldo
         function updateBalance() {
             document.getElementById('balance').textContent = `R$ ${balance.toFixed(2)}`;
         }
 
-        function showResult(text, type) {
-            const result = document.getElementById('result');
-            result.textContent = text;
-            result.className = `result ${type}`;
+        // Criar números na roleta
+        function createRouletteNumbers() {
+            rouletteNumbers.forEach((number, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'number-slot';
+                slot.textContent = number;
+
+                if (number === 0) {
+                    slot.classList.add('green');
+                } else if (redNumbers.includes(number)) {
+                    slot.classList.add('red');
+                } else {
+                    slot.classList.add('black');
+                }
+
+                const angle = (360 / rouletteNumbers.length) * index;
+                slot.style.transform = `rotate(${angle}deg)`;
+
+                wheel.appendChild(slot);
+            });
         }
 
-        // Inicializar
-        generateNumbersGrid();
+        createRouletteNumbers();
+
+        // Seleção de aposta
+        betButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                betButtons.forEach(b => b.classList.remove('selected'));
+                button.classList.add('selected');
+                selectedBet = button.dataset.bet;
+            });
+        });
+
+        spinBtn.addEventListener('click', async () => {
+            if (!selectedBet) {
+                alert('Selecione um tipo de aposta!');
+                return;
+            }
+
+            if (spinning) return;
+
+            const betAmount = parseInt(betAmountInput.value);
+            if (betAmount < 1 || betAmount > balance) {
+                alert('Valor inválido ou saldo insuficiente!');
+                return;
+            }
+
+            spinning = true;
+            spinBtn.disabled = true;
+            spinBtn.textContent = '🎲 GIRANDO...';
+            resultDiv.style.display = 'none';
+
+            // Iniciar rotação visual (loop)
+            let rotation = 0;
+            const spinInterval = setInterval(() => {
+                rotation += 10;
+                wheel.style.transform = `rotate(${rotation}deg)`;
+            }, 16);
+
+            try {
+                const response = await fetch('http://localhost:8080/api/spin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bet_type: selectedBet, bet_amount: betAmount })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erro ao iniciar giro');
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                await finishSpin(spinInterval);
+
+            } catch (error) {
+                console.error('Erro:', error);
+
+                // Se o erro for "Roleta já está girando", tentar recuperar o resultado
+                if (error.message === 'Roleta já está girando') {
+                    await finishSpin(spinInterval);
+                } else {
+                    alert('Erro: ' + error.message);
+                    resetWheel(spinInterval);
+                }
+            }
+        });
+
+        async function finishSpin(spinInterval) {
+            try {
+                const resultResponse = await fetch('http://localhost:8080/api/result');
+                const data = await resultResponse.json();
+
+                if (data.status === 'finished') {
+                    clearInterval(spinInterval);
+                    const result = data.result;
+
+                    const numberIndex = rouletteNumbers.indexOf(result.number);
+                    const anglePerSlot = 360 / rouletteNumbers.length;
+                    const targetAngle = numberIndex * anglePerSlot;
+                    const finalRotation = 1440 - targetAngle;
+
+                    wheel.style.transition = 'transform 4s cubic-bezier(0.1, 0.7, 0.1, 1)';
+                    wheel.style.transform = `rotate(${finalRotation}deg)`;
+
+                    await new Promise(resolve => setTimeout(resolve, 4000));
+
+                    displayResult(result, selectedBet, betAmountInput.value); // Use input value or stored bet
+                    loadBalance();
+                } else {
+                    throw new Error("Erro ao obter resultado");
+                }
+            } catch (e) {
+                alert('Erro ao finalizar giro: ' + e.message);
+                resetWheel(spinInterval);
+            } finally {
+                resetUI();
+            }
+        }
+
+        function resetWheel(interval) {
+            clearInterval(interval);
+            resetUI();
+        }
+
+        function resetUI() {
+            spinning = false;
+            spinBtn.disabled = false;
+            spinBtn.textContent = '🎲 GIRAR ROLETA';
+            setTimeout(() => {
+                wheel.style.transition = 'none';
+                wheel.style.transform = 'rotate(0deg)';
+            }, 5000);
+        }
+
+        // Check verification on load
+        async function checkStatus() {
+            try {
+                const response = await fetch('http://localhost:8080/api/status');
+                const data = await response.json();
+                if (data.spinning) {
+                    // Se estiver girando, tentar finalizar
+                    // Não temos o intervalo visual aqui, mas podemos pegar o resultado
+                    const res = await fetch('http://localhost:8080/api/result');
+                    const resData = await res.json();
+                    if (resData.status === 'finished') {
+                        // Mostrar resultado anterior?
+                        // Apenas atualizar saldo e avisar
+                        loadBalance();
+                    }
+                }
+            } catch (e) {
+                console.log("Erro ao checar status", e);
+            }
+        }
+        checkStatus();
+
+        function displayResult(result, bet, amount) {
+            const { number, color } = result;
+            let won = false;
+            let payout = 0;
+
+            switch (bet) {
+                case 'red':
+                    won = color === 'red';
+                    payout = won ? amount * 2 : 0;
+                    break;
+                case 'black':
+                    won = color === 'black';
+                    payout = won ? amount * 2 : 0;
+                    break;
+                case 'green':
+                    won = color === 'green';
+                    payout = won ? amount * 36 : 0;
+                    break;
+                case 'even':
+                    won = number > 0 && number % 2 === 0;
+                    payout = won ? amount * 2 : 0;
+                    break;
+                case 'odd':
+                    won = number > 0 && number % 2 === 1;
+                    payout = won ? amount * 2 : 0;
+                    break;
+                case 'low':
+                    won = number >= 1 && number <= 18;
+                    payout = won ? amount * 2 : 0;
+                    break;
+            }
+
+            resultDiv.innerHTML = `
+                <div>🎯 Resultado: <span class="${color}">${number} (${color.toUpperCase()})</span></div>
+                <div>${won ? '🎉 VOCÊ GANHOU!' : '😔 Você perdeu'}</div>
+                <div>💰 ${won ? `Ganhou: ${payout}` : `Perdeu: ${amount}`}</div>
+            `;
+
+            document.getElementById('lastBet').textContent = `R$ ${amount}`;
+            document.getElementById('lastWin').textContent = `R$ ${payout}`;
+            resultDiv.style.display = 'block';
+        }
     </script>
 </body>
+
 </html>

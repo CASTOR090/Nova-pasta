@@ -115,7 +115,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎰JUNNIN GAMES</h1>
+        <h1>🎰QUERO INJUSTIÇA</h1>
         <p class="subtitle">Escolha seu jogo e boa sorte!</p>
         
         <div class="games-grid">
@@ -174,5 +174,12 @@
             </div>
         </div>
     </div>
+    </div>
+    <script>
+        // Verificar se usuário está logado
+        if (!localStorage.getItem('userId')) {
+            window.location.href = 'login.html';
+        }
+    </script>
 </body>
 </html>

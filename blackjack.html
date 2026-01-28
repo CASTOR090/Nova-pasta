@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
@@ -20,6 +22,7 @@
             color: white;
             padding: 20px;
         }
+
         .container {
             background: rgba(0, 0, 0, 0.8);
             padding: 30px;
@@ -29,11 +32,13 @@
             max-width: 900px;
             width: 100%;
         }
+
         h1 {
             font-size: 3em;
             margin-bottom: 20px;
             color: #ffd700;
         }
+
         .nav-btn {
             position: absolute;
             top: 20px;
@@ -47,9 +52,11 @@
             font-weight: bold;
             transition: transform 0.2s;
         }
+
         .nav-btn:hover {
             transform: scale(1.05);
         }
+
         .table {
             background: linear-gradient(135deg, #1a472a 0%, #0d3d1f 100%);
             border-radius: 20px;
@@ -57,16 +64,20 @@
             margin: 20px 0;
             min-height: 400px;
             border: 5px solid #8B4513;
-            box-shadow: inset 0 4px 8px rgba(0,0,0,0.5);
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
         }
-        .dealer-area, .player-area {
+
+        .dealer-area,
+        .player-area {
             margin: 20px 0;
         }
+
         .area-title {
             font-size: 1.5em;
             margin-bottom: 15px;
             color: #ffd700;
         }
+
         .cards {
             display: flex;
             justify-content: center;
@@ -75,6 +86,7 @@
             align-items: center;
             flex-wrap: wrap;
         }
+
         .card {
             width: 80px;
             height: 120px;
@@ -86,25 +98,30 @@
             padding: 10px;
             font-size: 1.5em;
             font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             animation: dealCard 0.3s ease-out;
         }
+
         @keyframes dealCard {
             from {
                 transform: translateY(-50px) rotateY(180deg);
                 opacity: 0;
             }
+
             to {
                 transform: translateY(0) rotateY(0);
                 opacity: 1;
             }
         }
+
         .card.red {
             color: #ff0000;
         }
+
         .card.black {
             color: #000;
         }
+
         .card-back {
             width: 80px;
             height: 120px;
@@ -114,14 +131,16 @@
             align-items: center;
             justify-content: center;
             font-size: 3em;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
+
         .total {
             font-size: 1.8em;
             margin-top: 10px;
             color: #00ff88;
             font-weight: bold;
         }
+
         .controls {
             display: flex;
             gap: 15px;
@@ -129,6 +148,7 @@
             flex-wrap: wrap;
             justify-content: center;
         }
+
         input {
             padding: 15px;
             font-size: 1.1em;
@@ -137,6 +157,7 @@
             width: 150px;
             text-align: center;
         }
+
         button {
             padding: 15px 30px;
             font-size: 1.2em;
@@ -146,25 +167,31 @@
             font-weight: bold;
             transition: all 0.3s;
         }
+
         button:hover:not(:disabled) {
             transform: scale(1.05);
         }
+
         button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
+
         .btn-start {
             background: #00ff88;
             color: #000;
         }
+
         .btn-hit {
             background: #ffd700;
             color: #000;
         }
+
         .btn-stand {
             background: #ff4444;
             color: white;
         }
+
         .stats {
             display: flex;
             justify-content: space-around;
@@ -175,42 +202,50 @@
             flex-wrap: wrap;
             gap: 20px;
         }
+
         .stat {
             display: flex;
             flex-direction: column;
         }
+
         .stat-label {
             font-size: 1em;
             opacity: 0.8;
         }
+
         .stat-value {
             font-size: 1.8em;
             font-weight: bold;
             margin-top: 5px;
         }
+
         .message {
             margin-top: 20px;
             font-size: 1.5em;
             min-height: 40px;
             font-weight: bold;
         }
+
         .win {
             color: #00ff88;
         }
+
         .lose {
             color: #ff4444;
         }
+
         .tie {
             color: #ffd700;
         }
     </style>
 </head>
+
 <body>
     <button class="nav-btn" onclick="window.location.href='home.html'">🏠 HOME</button>
 
     <div class="container">
         <h1>🃏 JOGO DE 21</h1>
-        
+
         <div class="table">
             <div class="dealer-area">
                 <div class="area-title">🎩 DEALER</div>
@@ -251,7 +286,7 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:7000/api/blackjack';
+        const API_URL = 'http://localhost:8080/api/blackjack';
         let isPlaying = false;
 
         async function checkServer() {
@@ -286,16 +321,19 @@
 
         async function startGame() {
             const betAmount = parseFloat(document.getElementById('betAmount').value);
-            
+
+            showMessage('Distribuindo cartas...', 'tie');
+
             try {
+                // Requisição ao servidor
                 const response = await fetch(`${API_URL}/start`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ bet: betAmount })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (!data.success) {
                     showMessage('Aposta inválida!', 'lose');
                     return;
@@ -306,29 +344,35 @@
                 document.getElementById('hitBtn').disabled = false;
                 document.getElementById('standBtn').disabled = false;
                 document.getElementById('betAmount').disabled = true;
-                document.getElementById('message').textContent = '';
                 document.getElementById('lastBet').textContent = `R$ ${betAmount.toFixed(2)}`;
-                
-                // Mostrar cartas do jogador
+
+                // Limpar mesa
                 const playerCardsDiv = document.getElementById('playerCards');
-                playerCardsDiv.innerHTML = '';
-                data.player_hand.forEach(card => {
-                    playerCardsDiv.appendChild(createCard(card));
-                });
-                document.getElementById('playerTotal').textContent = `Total: ${data.player_total}`;
-                
-                // Mostrar carta do dealer (1 visível, 1 escondida)
                 const dealerCardsDiv = document.getElementById('dealerCards');
+                playerCardsDiv.innerHTML = '';
                 dealerCardsDiv.innerHTML = '';
-                dealerCardsDiv.appendChild(createCard(data.dealer_hand[0]));
-                dealerCardsDiv.appendChild(createCardBack());
+                document.getElementById('playerTotal').textContent = '';
                 document.getElementById('dealerTotal').textContent = '';
-                
+
+                // Animar cartas do jogador
+                for (const card of data.player_hand) {
+                    await new Promise(r => setTimeout(r, 500));
+                    playerCardsDiv.appendChild(createCard(card));
+                }
+                document.getElementById('playerTotal').textContent = `Total: ${data.player_total}`;
+
+                // Animar cartas do dealer
+                await new Promise(r => setTimeout(r, 500));
+                dealerCardsDiv.appendChild(createCard(data.dealer_hand[0]));
+                await new Promise(r => setTimeout(r, 500));
+                dealerCardsDiv.appendChild(createCardBack());
+
                 updateBalance(data.balance);
-                
+                showMessage('', '');
+
                 // Verificar blackjack
                 if (data.player_total === 21) {
-                    setTimeout(() => stand(), 500);
+                    setTimeout(() => stand(), 1000);
                 }
             } catch (error) {
                 showMessage('Erro ao conectar com servidor!', 'lose');
@@ -337,22 +381,30 @@
 
         async function hit() {
             if (!isPlaying) return;
-            
+
+            showMessage('Pedindo carta...', 'tie');
+
             try {
                 const response = await fetch(`${API_URL}/hit`, { method: 'POST' });
                 const data = await response.json();
-                
+
+                // Delay visual
+                await new Promise(r => setTimeout(r, 500));
+
                 const playerCardsDiv = document.getElementById('playerCards');
-                playerCardsDiv.innerHTML = '';
-                data.player_hand.forEach(card => {
-                    playerCardsDiv.appendChild(createCard(card));
-                });
+                // Adicionar apenas a nova carta (última do array)
+                const newCard = data.player_hand[data.player_hand.length - 1];
+                playerCardsDiv.appendChild(createCard(newCard));
+
                 document.getElementById('playerTotal').textContent = `Total: ${data.player_total}`;
-                
+
                 if (data.busted) {
+                    await new Promise(r => setTimeout(r, 1000));
                     showMessage('💥 ESTOUROU! Você perdeu!', 'lose');
                     document.getElementById('lastWin').textContent = 'R$ 0.00';
                     endGame();
+                } else {
+                    showMessage('', '');
                 }
             } catch (error) {
                 showMessage('Erro ao pedir carta!', 'lose');
@@ -361,30 +413,34 @@
 
         async function stand() {
             if (!isPlaying) return;
-            
+
+            showMessage('Dealer jogando...', 'tie');
+
             try {
                 const response = await fetch(`${API_URL}/stand`, { method: 'POST' });
                 const data = await response.json();
-                
-                // Mostrar todas as cartas do dealer
+
+                // Revelar cartas do dealer
                 const dealerCardsDiv = document.getElementById('dealerCards');
-                dealerCardsDiv.innerHTML = '';
-                data.dealer_hand.forEach(card => {
-                    dealerCardsDiv.appendChild(createCard(card));
-                });
+                dealerCardsDiv.innerHTML = ''; // Limpar para redesenhar (incluindo a oculta que agora vai aparecer)
+
+                // Mostrar a primeira carta (que já estava lá, mas vamos redesenhar para consistência)
+                dealerCardsDiv.appendChild(createCard(data.dealer_hand[0]));
+
+                // Mostrar as outras cartas com delay
+                for (let i = 1; i < data.dealer_hand.length; i++) {
+                    await new Promise(r => setTimeout(r, 800));
+                    dealerCardsDiv.appendChild(createCard(data.dealer_hand[i]));
+                    document.getElementById('dealerTotal').textContent = `Total: ???`; // Poderia calcular parcial
+                }
+
                 document.getElementById('dealerTotal').textContent = `Total: ${data.dealer_total}`;
-                
-                // Atualizar cartas do jogador
-                const playerCardsDiv = document.getElementById('playerCards');
-                playerCardsDiv.innerHTML = '';
-                data.player_hand.forEach(card => {
-                    playerCardsDiv.appendChild(createCard(card));
-                });
-                document.getElementById('playerTotal').textContent = `Total: ${data.player_total}`;
-                
+
                 updateBalance(data.balance);
                 document.getElementById('lastWin').textContent = `R$ ${data.win_amount.toFixed(2)}`;
-                
+
+                await new Promise(r => setTimeout(r, 500));
+
                 if (data.won === true) {
                     showMessage(`🏆 VOCÊ VENCEU! Ganhou R$ ${data.win_amount.toFixed(2)}`, 'win');
                 } else if (data.won === null) {
@@ -392,7 +448,7 @@
                 } else {
                     showMessage('😢 DEALER VENCEU!', 'lose');
                 }
-                
+
                 endGame();
             } catch (error) {
                 showMessage('Erro ao parar!', 'lose');
@@ -419,15 +475,15 @@
 
         async function resetBalance() {
             try {
-                const response = await fetch(`${API_URL}/reset`, { 
+                const response = await fetch(`${API_URL}/reset`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }
-                
+
                 const data = await response.json();
                 updateBalance(data.balance);
                 showMessage('💰 Saldo resetado para R$ 50.000!', 'win');
@@ -440,22 +496,23 @@
         checkServer();
 
         // Resetar saldo ao sair da página
-        window.addEventListener('beforeunload', function() {
-            fetch(`${API_URL}/reset`, { 
+        window.addEventListener('beforeunload', function () {
+            fetch(`${API_URL}/reset`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 keepalive: true
-            }).catch(() => {});
+            }).catch(() => { });
         });
 
         // Resetar saldo ao navegar para outra página
-        window.addEventListener('pagehide', function() {
-            fetch(`${API_URL}/reset`, { 
+        window.addEventListener('pagehide', function () {
+            fetch(`${API_URL}/reset`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 keepalive: true
-            }).catch(() => {});
+            }).catch(() => { });
         });
     </script>
 </body>
+
 </html>

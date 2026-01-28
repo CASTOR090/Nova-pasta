@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Servidor</title>
+</head>
+<body>
+    <h1>Teste de Conexão</h1>
+    <button onclick="testarServidor()">Testar Servidor</button>
+    <div id="resultado"></div>
+
+    <script>
+        async function testarServidor() {
+            try {
+                console.log('Testando conexão...');
+                const response = await fetch('http://localhost:8080/api/status');
+                const data = await response.json();
+                document.getElementById('resultado').innerHTML = 'Servidor OK: ' + JSON.stringify(data);
+                console.log('Resposta:', data);
+            } catch (error) {
+                document.getElementById('resultado').innerHTML = 'Erro: ' + error.message;
+                console.error('Erro:', error);
+            }
+        }
+    </script>
+</body>
+</html>

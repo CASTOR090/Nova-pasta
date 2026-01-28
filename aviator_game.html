@@ -378,15 +378,29 @@
         let multiplier = 1.00;
         let isFlying = false;
         let hasTakenOff = false;
-        let crashPoint = 0;
         let gameInterval;
+        
+        // Carregar saldo do servidor
+        async function loadBalance() {
+            try {
+                const response = await fetch('http://localhost:8080/api/aviator/status');
+                const data = await response.json();
+                balance = data.balance || 1000;
+                updateDisplay();
+            } catch (error) {
+                balance = 1000;
+                updateDisplay();
+            }
+        }
+        
+        loadBalance();
         
         function updateDisplay() {
             document.getElementById('balance').textContent = `R$ ${balance.toFixed(2)}`;
             document.getElementById('multiplier').textContent = `${multiplier.toFixed(2)}x`;
         }
 
-        function startFlight() {
+        async function startFlight() {
             const betValue = parseFloat(document.getElementById('betAmount').value);
             
             if (betValue <= 0 || betValue > balance) {
@@ -394,41 +408,59 @@
                 return;
             }
 
-            balance -= betValue;
-            currentBet = betValue;
-            multiplier = 1.00;
-            isFlying = true;
-            hasTakenOff = false;
-            
-            // Definir ponto de crash (55% baixo, 45% alto)
-            const random = Math.random();
-            if (random < 0.55) {
-                crashPoint = 1.1 + Math.random() * 0.7; // 1.1x - 1.8x
-            } else {
-                crashPoint = 1.8 + Math.random() * 1.2; // 1.8x - 3.0x
-            }
-            
-            document.getElementById('betBtn').disabled = true;
-            document.getElementById('cashoutBtn').disabled = false;
-            document.getElementById('betAmount').disabled = true;
-            document.getElementById('currentBet').textContent = `R$ ${betValue.toFixed(2)}`;
-            document.getElementById('message').textContent = 'Acelerando na pista...';
-            
-            updateDisplay();
-            flyPlane();
-            
-            gameInterval = setInterval(() => {
-                // Só conta multiplicador após decolar
-                if (hasTakenOff) {
-                    multiplier += 0.01;
-                    
-                    if (multiplier >= crashPoint) {
-                        crash();
-                    }
+            try {
+                const response = await fetch('http://localhost:8080/api/aviator/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bet: betValue })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    showMessage('Erro ao iniciar voo!', 'lose');
+                    return;
                 }
+
+                currentBet = betValue;
+                multiplier = 1.00;
+                isFlying = true;
+                hasTakenOff = false;
+                balance = data.balance;
+                
+                document.getElementById('betBtn').disabled = true;
+                document.getElementById('cashoutBtn').disabled = false;
+                document.getElementById('betAmount').disabled = true;
+                document.getElementById('currentBet').textContent = `R$ ${betValue.toFixed(2)}`;
+                document.getElementById('message').textContent = 'Acelerando na pista...';
                 
                 updateDisplay();
-            }, 50);
+                flyPlane();
+                
+                // Verificar status do jogo no servidor
+                gameInterval = setInterval(async () => {
+                    try {
+                        const statusResponse = await fetch('http://localhost:8080/api/aviator/status');
+                        const statusData = await statusResponse.json();
+                        
+                        if (statusData.flying) {
+                            multiplier = statusData.multiplier;
+                            if (hasTakenOff) {
+                                updateDisplay();
+                            }
+                        } else if (statusData.crashed) {
+                            crash();
+                        }
+                        
+                        balance = statusData.balance;
+                    } catch (error) {
+                        console.error('Erro ao verificar status:', error);
+                    }
+                }, 100);
+                
+            } catch (error) {
+                showMessage('Erro de conexão!', 'lose');
+            }
         }
 
         function flyPlane() {
@@ -504,16 +536,27 @@
             }, 50);
         }
 
-        function cashOut() {
+        async function cashOut() {
             if (!isFlying || !hasTakenOff) return;
             
-            const winValue = currentBet * multiplier;
-            balance += winValue;
-            
-            document.getElementById('winAmount').textContent = `R$ ${winValue.toFixed(2)}`;
-            showMessage(`Você ganhou R$ ${winValue.toFixed(2)}! (${multiplier.toFixed(2)}x)`, 'win');
-            
-            endGame();
+            try {
+                const response = await fetch('http://localhost:8080/api/aviator/cashout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                const winValue = data.winAmount;
+                balance = data.balance;
+                
+                document.getElementById('winAmount').textContent = `R$ ${winValue.toFixed(2)}`;
+                showMessage(`Você ganhou R$ ${winValue.toFixed(2)}! (${multiplier.toFixed(2)}x)`, 'win');
+                
+                endGame();
+            } catch (error) {
+                showMessage('Erro ao sacar!', 'lose');
+            }
         }
 
         function crash() {
@@ -539,10 +582,11 @@
                 document.getElementById('plane').style.bottom = '80px';
                 document.getElementById('trajectory').innerHTML = '';
                 document.getElementById('message').textContent = 'Faça sua aposta para decolar!';
+                document.getElementById('multiplier').classList.remove('crashed');
                 hasTakenOff = false;
+                // Recarregar saldo do servidor
+                loadBalance();
             }, 3000);
-            
-            updateDisplay();
         }
 
         function showMessage(text, type) {

@@ -257,7 +257,7 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:4000/api/penalty';
+        const API_URL = 'http://localhost:8080/api/penalty';
         let selectedPosition = null;
         let isShooting = false;
 
@@ -366,8 +366,8 @@
                             selectedPosition = null;
                             document.getElementById('selectedPos').textContent = '-';
                             isShooting = false;
-                        }, 2500);
-                    }, 500);
+                        }, 4000);
+                    }, 1000);
                 }, 300);
                 
             } catch (error) {

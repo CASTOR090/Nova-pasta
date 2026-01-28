@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -19,6 +21,7 @@
             min-height: 100vh;
             color: white;
         }
+
         .container {
             background: rgba(0, 0, 0, 0.8);
             padding: 40px;
@@ -26,11 +29,13 @@
             text-align: center;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
         }
+
         h1 {
             font-size: 3em;
             margin-bottom: 30px;
             color: #ffd700;
         }
+
         .nav-btn {
             position: absolute;
             top: 20px;
@@ -43,6 +48,7 @@
             cursor: pointer;
             font-weight: bold;
         }
+
         .machine {
             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
             padding: 40px;
@@ -51,6 +57,7 @@
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
             position: relative;
         }
+
         .lever-container {
             position: absolute;
             right: -60px;
@@ -58,6 +65,7 @@
             transform: translateY(-50%);
             cursor: pointer;
         }
+
         .lever {
             width: 20px;
             height: 150px;
@@ -65,11 +73,13 @@
             border-radius: 10px;
             position: relative;
             transition: transform 0.3s;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
         }
+
         .lever.pulled {
             transform: translateY(80px);
         }
+
         .lever-handle {
             position: absolute;
             top: -20px;
@@ -82,12 +92,14 @@
             border: 3px solid #ffd700;
             box-shadow: 0 4px 12px rgba(255, 0, 0, 0.6);
         }
+
         .slots {
             display: flex;
             gap: 20px;
             justify-content: center;
             margin: 30px 0;
         }
+
         .slot {
             width: 120px;
             height: 120px;
@@ -98,8 +110,9 @@
             justify-content: center;
             font-size: 4em;
             border: 4px solid #333;
-            box-shadow: inset 0 4px 8px rgba(0,0,0,0.3);
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3);
         }
+
         .controls {
             margin: 30px 0;
             display: flex;
@@ -107,6 +120,7 @@
             justify-content: center;
             flex-wrap: wrap;
         }
+
         input {
             padding: 15px;
             font-size: 1.2em;
@@ -115,6 +129,7 @@
             width: 150px;
             text-align: center;
         }
+
         button {
             padding: 15px 40px;
             font-size: 1.3em;
@@ -126,14 +141,17 @@
             font-weight: bold;
             transition: all 0.3s;
         }
+
         button:hover:not(:disabled) {
             transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(255, 215, 0, 0.5);
         }
+
         button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
+
         .stats {
             display: flex;
             justify-content: space-around;
@@ -141,50 +159,70 @@
             gap: 20px;
             flex-wrap: wrap;
         }
+
         .stat {
             background: rgba(255, 255, 255, 0.1);
             padding: 15px 30px;
             border-radius: 10px;
         }
+
         .stat-label {
             font-size: 1em;
             opacity: 0.8;
         }
+
         .stat-value {
             font-size: 1.8em;
             font-weight: bold;
             margin-top: 5px;
         }
+
         .message {
             margin-top: 20px;
             font-size: 1.8em;
             min-height: 40px;
             font-weight: bold;
         }
-        .win { color: #00ff88; }
-        .lose { color: #ff4444; }
-        @keyframes spin {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+
+        .win {
+            color: #00ff88;
         }
+
+        .lose {
+            color: #ff4444;
+        }
+
+        @keyframes spin {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
         .spinning {
             animation: spin 0.1s infinite;
         }
     </style>
 </head>
+
 <body>
     <button class="nav-btn" onclick="window.location.href='home.html'">🏠 HOME</button>
 
     <div class="container">
         <h1>🎰 CAÇA-NÍQUEIS</h1>
-        
+
         <div class="machine">
             <div class="lever-container" id="leverContainer" onclick="pullLever()">
                 <div class="lever" id="lever">
                     <div class="lever-handle"></div>
                 </div>
             </div>
-            
+
             <div class="slots">
                 <div class="slot" id="slot1">🍒</div>
                 <div class="slot" id="slot2">🍋</div>
@@ -215,37 +253,59 @@
     </div>
 
     <script>
-        const symbols = ['🍒', '🍋', '🍊', '🍇', '🍉', '⭐', '💎'];
+        // Verificar se usuário está logado
+        if (!localStorage.getItem('userId')) {
+            window.location.href = 'index.html';
+        }
+
         let balance = 1000;
+
+        async function loadBalance() {
+            try {
+                const response = await fetch('http://localhost:8080/api/status');
+                const data = await response.json();
+                balance = data.balance || 1000;
+                updateBalance();
+            } catch (error) {
+                balance = 1000;
+                updateBalance();
+            }
+        }
+
+        loadBalance();
+
+        function updateBalance() {
+            document.getElementById('balance').textContent = `R$ ${balance.toFixed(2)}`;
+        }
+
+        const symbols = ['🍒', '🍋', '🍊', '🍇', '🔔', '💎', '7️⃣'];
         let isSpinning = false;
 
         function pullLever() {
             if (isSpinning) return;
-            
+
             const lever = document.getElementById('lever');
             lever.classList.add('pulled');
-            
+
             setTimeout(() => {
                 lever.classList.remove('pulled');
             }, 300);
-            
+
             spin();
         }
 
-        function spin() {
+        async function spin() {
             if (isSpinning) return;
-            
+
             const bet = parseFloat(document.getElementById('betAmount').value);
             if (bet <= 0 || bet > balance) {
                 showMessage('Aposta inválida!', 'lose');
                 return;
             }
 
-            balance -= bet;
-            updateBalance();
             document.getElementById('lastBet').textContent = `R$ ${bet.toFixed(2)}`;
-            document.getElementById('message').textContent = '';
-            
+            showMessage('Girando slots...', 'lose');
+
             isSpinning = true;
             document.getElementById('leverContainer').style.cursor = 'not-allowed';
 
@@ -253,61 +313,73 @@
             const slot2 = document.getElementById('slot2');
             const slot3 = document.getElementById('slot3');
 
+            // Iniciar animação visual
             slot1.classList.add('spinning');
             slot2.classList.add('spinning');
             slot3.classList.add('spinning');
 
-            let counter = 0;
-            const interval = setInterval(() => {
+            let animationInterval = setInterval(() => {
                 slot1.textContent = symbols[Math.floor(Math.random() * symbols.length)];
                 slot2.textContent = symbols[Math.floor(Math.random() * symbols.length)];
                 slot3.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-                counter++;
+            }, 100);
 
-                if (counter > 20) {
-                    clearInterval(interval);
+            try {
+                // Requisição ao servidor
+                const response = await fetch('http://localhost:8080/api/slots/spin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bet: bet })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    clearInterval(animationInterval);
                     slot1.classList.remove('spinning');
                     slot2.classList.remove('spinning');
                     slot3.classList.remove('spinning');
-
-                    // Resultado final com chance de perder aumentada
-                    const rand = Math.random();
-                    let result1, result2, result3;
-
-                    if (rand < 0.02) { // 2% - Jackpot (3 diamantes)
-                        result1 = result2 = result3 = '💎';
-                    } else if (rand < 0.05) { // 3% - 3 iguais (estrelas)
-                        result1 = result2 = result3 = '⭐';
-                    } else if (rand < 0.15) { // 10% - 3 iguais (frutas)
-                        const fruit = symbols[Math.floor(Math.random() * 5)];
-                        result1 = result2 = result3 = fruit;
-                    } else if (rand < 0.30) { // 15% - 2 iguais
-                        result1 = result2 = symbols[Math.floor(Math.random() * symbols.length)];
-                        result3 = symbols[Math.floor(Math.random() * symbols.length)];
-                        while (result3 === result1) {
-                            result3 = symbols[Math.floor(Math.random() * symbols.length)];
-                        }
-                    } else { // 70% - Perder
-                        result1 = symbols[Math.floor(Math.random() * symbols.length)];
-                        result2 = symbols[Math.floor(Math.random() * symbols.length)];
-                        result3 = symbols[Math.floor(Math.random() * symbols.length)];
-                        while (result2 === result1) {
-                            result2 = symbols[Math.floor(Math.random() * symbols.length)];
-                        }
-                        while (result3 === result1 || result3 === result2) {
-                            result3 = symbols[Math.floor(Math.random() * symbols.length)];
-                        }
-                    }
-
-                    slot1.textContent = result1;
-                    slot2.textContent = result2;
-                    slot3.textContent = result3;
-
-                    checkWin(result1, result2, result3, bet);
-                    isSpinning = false;
-                    document.getElementById('leverContainer').style.cursor = 'pointer';
+                    showMessage(data.message || 'Erro na aposta', 'lose');
+                    return;
                 }
-            }, 100);
+
+                // Delay razoável para a animação (3 segundos)
+                await new Promise(resolve => setTimeout(resolve, 3000));
+
+                clearInterval(animationInterval);
+
+                slot1.textContent = data.result[0];
+                slot2.textContent = data.result[1];
+                slot3.textContent = data.result[2];
+
+                balance = data.balance;
+                updateBalance();
+
+                if (data.winAmount > 0) {
+                    showMessage(`Ganhou R$ ${data.winAmount.toFixed(2)}!`, 'win');
+                } else {
+                    showMessage('Tente novamente!', 'lose');
+                }
+
+                document.getElementById('lastWin').textContent = `R$ ${data.winAmount.toFixed(2)}`;
+
+                slot1.classList.remove('spinning');
+                slot2.classList.remove('spinning');
+                slot3.classList.remove('spinning');
+
+                checkWin(data.result[0], data.result[1], data.result[2], bet);
+
+            } catch (error) {
+                clearInterval(animationInterval);
+                slot1.classList.remove('spinning');
+                slot2.classList.remove('spinning');
+                slot3.classList.remove('spinning');
+                console.error(error);
+                showMessage('Erro no servidor!', 'lose');
+            }
+
+            isSpinning = false;
+            document.getElementById('leverContainer').style.cursor = 'pointer';
         }
 
         function checkWin(s1, s2, s3, bet) {
@@ -318,9 +390,12 @@
                 if (s1 === '💎') {
                     winAmount = bet * 50;
                     message = '💎 JACKPOT! 50x';
-                } else if (s1 === '⭐') {
-                    winAmount = bet * 20;
-                    message = '⭐ INCRÍVEL! 20x';
+                } else if (s1 === '7️⃣') {
+                    winAmount = bet * 25;
+                    message = '7️⃣ INCRÍVEL! 25x';
+                } else if (s1 === '🔔') {
+                    winAmount = bet * 15;
+                    message = '🔔 ÓTIMO! 15x';
                 } else {
                     winAmount = bet * 10;
                     message = '🎉 3 IGUAIS! 10x';
@@ -343,10 +418,6 @@
             updateBalance();
         }
 
-        function updateBalance() {
-            document.getElementById('balance').textContent = `R$ ${balance.toFixed(2)}`;
-        }
-
         function showMessage(text, type) {
             const msg = document.getElementById('message');
             msg.textContent = text;
@@ -354,4 +425,5 @@
         }
     </script>
 </body>
+
 </html>
